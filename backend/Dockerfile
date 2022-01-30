@@ -11,5 +11,5 @@ RUN cargo build --release
 # 本番環境
 FROM rust:1.58.1-slim-bullseye
 COPY --from=build-stage /app/target/release/hello-actix .
-EXPOSE 8088
+EXPOSE 3000
 CMD ["/usr/local/bin/hello-actix"]
