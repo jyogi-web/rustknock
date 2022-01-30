@@ -12,15 +12,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: azure/docker-login@v1
+    - name: Login
+      uses: azure/docker-login@v1
       with:
         login-server: helloactix.azurecr.io
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
-    - run: |
-        docker build . -t helloactix.azurecr.io/helloactix:${{ github.sha }} -f "backend/Dockerfile"
+    - name: Build
+      env:
+        DOCKER_BUILDKIT: 1
+      run: |
+        docker build ./backend -t helloactix.azurecr.io/helloactix:${{ github.sha }} -f "backend/Dockerfile"
         docker push helloactix.azurecr.io/helloactix:${{ github.sha }}
-    - uses: azure/webapps-deploy@v2
+    - name: Deploy
+      uses: azure/webapps-deploy@v2
       with:
         app-name: 'helloactix'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
