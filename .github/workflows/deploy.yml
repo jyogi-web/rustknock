@@ -18,7 +18,7 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
     - run: |
-        docker build . -t helloactix.azurecr.io/helloactix:${{ github.sha }} -f "docker/app/Dockerfile"
+        docker build . -t helloactix.azurecr.io/helloactix:${{ github.sha }} -f "backend/Dockerfile"
         docker push helloactix.azurecr.io/helloactix:${{ github.sha }}
     - uses: azure/webapps-deploy@v2
       with:
