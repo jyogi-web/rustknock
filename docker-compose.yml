@@ -1,0 +1,20 @@
+version: '3.7'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      target: 'develop-stage'
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+      - cargo-cache:/usr/local/cargo/registry
+      - target-cache:/app/target
+    command: /bin/sh -c "cargo watch -x run"
+
+volumes:
+  cargo-cache:
+  target-cache:
