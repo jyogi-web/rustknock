@@ -5,11 +5,18 @@ RUN cargo install cargo-watch
 COPY . .
 
 # ビルド環境
-FROM develop-stage as build-stage
+FROM rust:1.58.1 AS builder
+WORKDIR /app
+COPY Cargo.toml Cargo.toml
+RUN mkdir src
+RUN echo "fn main(){}" > src/main.rs
+RUN cargo build --release
+COPY ./src ./src
+RUN rm -f target/release/deps/hello_actix*
 RUN cargo build --release
 
 # 本番環境
 FROM rust:1.58.1-slim-bullseye
-COPY --from=build-stage /app/target/release/hello-actix .
+COPY --from=builder /app/target/release/hello-actix /usr/local/bin/hello-actix
 EXPOSE 3000
-CMD ["/usr/local/bin/hello-actix"]
+CMD ["hello-actix"]
