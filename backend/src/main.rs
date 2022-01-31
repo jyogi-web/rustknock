@@ -1,4 +1,5 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_cors::Cors;
+use actix_web::{get, post, web, App, http::header, HttpResponse, HttpServer, Responder, middleware::Logger};
 
 #[get("/")]
 async fn hello() -> impl Responder {
@@ -18,6 +19,13 @@ async fn manual_hello() -> impl Responder {
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
+        .wrap(
+            Cors::default()
+                .allowed_origin("*")
+                .supports_credentials()
+                .max_age(3600),
+        )
+        .wrap(Logger::default())
             .service(hello)
             .service(echo)
             .route("/hey", web::get().to(manual_hello))
