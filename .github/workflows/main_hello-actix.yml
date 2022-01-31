@@ -31,7 +31,8 @@ jobs:
       with:
         push: true
         tags: helloactix.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_381d46955a364ae59470fd6489486670 }}/helloactix:${{ github.sha }}
-        file: ./backend/Dockerfile
+        file: ./Dockerfile
+        working-directory: ./backend
 
   deploy:
     runs-on: ubuntu-latest
