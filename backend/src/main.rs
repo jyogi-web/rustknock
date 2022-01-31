@@ -3,7 +3,7 @@ use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, middle
 
 #[get("/")]
 async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello actix!")
+    HttpResponse::Ok().body("Hello actix from Azure Web Apps!")
 }
 
 #[post("/echo")]
