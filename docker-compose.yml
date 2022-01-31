@@ -5,6 +5,8 @@ services:
     build:
       context: ./backend
       target: 'develop-stage'
+    environment:
+      - RUST_BACKTRACE=1
     ports:
       - "3000:3000"
     depends_on:
