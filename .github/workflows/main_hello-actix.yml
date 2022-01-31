@@ -16,6 +16,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Cache Docker layers
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ github.ref }}-${{ github.sha }}
+        restore-keys: |
+          ${{ github.ref }}-${{ github.sha }}
+          ${{ github.ref }}
+          refs/head/main
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
@@ -33,6 +43,8 @@ jobs:
         tags: helloactix.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_381d46955a364ae59470fd6489486670 }}/helloactix:${{ github.sha }}
         file: ./backend/Dockerfile
         context: ./backend
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache
 
     - name: Notify result to slack
       uses: homoluctus/slatify@master
