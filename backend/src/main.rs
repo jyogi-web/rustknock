@@ -1,5 +1,5 @@
 use actix_cors::Cors;
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, middleware::Logger};
+use actix_web::{get, middleware::Logger, post, web, App, HttpResponse, HttpServer, Responder};
 
 #[get("/")]
 async fn hello() -> impl Responder {
