@@ -12,7 +12,7 @@ RUN mkdir ./src
 RUN echo "fn main(){}" > ./src/main.rs
 RUN cargo build --release
 COPY ./src ./src
-#COPY ./quizzes.json ./quizzes.json
+COPY ./quizzes.json ./quizzes.json
 RUN rm -f ./target/release/deps/hello_actix*
 RUN cargo build --release
 
