@@ -1,22 +1,16 @@
+mod quiz_json_reader;
+
 use actix_cors::Cors;
-use actix_web::{get, middleware::Logger, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, middleware::Logger, App, HttpResponse, HttpServer, Responder};
 
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello actix from Azure Web Apps!")
-}
-
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    HttpResponse::Ok().body(req_body)
-}
-
-async fn manual_hello() -> impl Responder {
-    HttpResponse::Ok().body("Hey there!")
+#[get("/quiz")]
+async fn quiz() -> impl Responder {
+    HttpResponse::Ok().json(quiz_json_reader::read_file())
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    std::env::set_var("RUST_LOG", "actix_web=info");
     HttpServer::new(|| {
         App::new()
             .wrap(
@@ -26,9 +20,7 @@ async fn main() -> std::io::Result<()> {
                     .max_age(3600),
             )
             .wrap(Logger::default())
-            .service(hello)
-            .service(echo)
-            .route("/hey", web::get().to(manual_hello))
+            .service(quiz)
     })
     .bind(("0.0.0.0", 3000))?
     .run()
