@@ -1,0 +1,51 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy container app to Azure Web App - rustknock-server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Log in to registry
+      uses: docker/login-action@v1
+      with:
+        registry: https://rustknockserver.azurecr.io/
+        username: ${{ secrets.AzureAppService_ContainerUsername_2258d6cd9dec46fdae6fc9c70de3ffaa }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_c067387b5f214c1d929e08ea6a91adc4 }}
+
+    - name: Build and push container image to registry
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: rustknockserver.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_2258d6cd9dec46fdae6fc9c70de3ffaa }}/rustknock-server:${{ github.sha }}
+        file: ./Dockerfile
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+    - name: Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'rustknock-server'
+        slot-name: 'production'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_0024d1aaf6ae40e8b42c1f0c79d890da }}
+        images: 'rustknockserver.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_2258d6cd9dec46fdae6fc9c70de3ffaa }}/rustknock-server:${{ github.sha }}'
