@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use actix::prelude::*;
 use getset::Getters;
-use log::info;
+use log::{debug, info};
 use quiz_json::Quiz;
 
 use crate::message::{JoinRoom, LeaveRoom, QuizStartRequest, WsMessage};
@@ -124,17 +124,22 @@ impl Handler<QuizStartRequest> for QuizRoom {
     type Result = ();
 
     fn handle(&mut self, _msg: QuizStartRequest, ctx: &mut Self::Context) -> Self::Result {
-        match self.state {
-            QuizLifecycle::Ready => self.state = QuizLifecycle::Starting,
-            _ => (),
-        }
+        if let QuizLifecycle::Ready = self.state {
+            let res = reqwest::blocking::get(format!(
+                "http://{}{}",
+                select_quizzes_endpoint, QUIZ_QUESTION_NUMBER
+            ));
+            if let Ok(res) = res {
+                self.quizzes = if let Ok(json) = res.json() {
+                    json
+                } else {
+                    return;
+                };
+                debug!("{:?}", &self.quizzes);
+            }
 
-        let res = reqwest::blocking::get(format!(
-            "{}{}",
-            select_quizzes_endpoint, QUIZ_QUESTION_NUMBER
-        ));
-        if let Ok(res) = res {
-            self.quizzes = res.json().unwrap_or_default();
+            info!("Start quiz in {} room", &self.room_name);
+            self.state = QuizLifecycle::Starting;
         }
     }
 }
