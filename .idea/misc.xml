@@ -4,16 +4,12 @@
     <option name="openedFilesInfos">
       <list>
         <OpenedFileInfo>
+          <option name="caretOffset" value="2076" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/.github/workflows/azure-static-web-apps-lemon-pond-09fbd3f00.yml" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
           <option name="caretOffset" value="2106" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/.github/workflows/azure-static-web-apps.yml" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="2743" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/.github/workflows/main_hello-actix.yml" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="1994" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/.github/workflows/azure-static-web-apps-lemon-pond-09fbd3f00.yml" />
         </OpenedFileInfo>
         <OpenedFileInfo>
           <option name="caretOffset" value="0" />
