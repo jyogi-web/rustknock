@@ -13,10 +13,10 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
-#[derive(Serialize, Deserialize, Debug, Getters)]
+#[derive(Serialize, Deserialize, Debug, Getters, Clone, Default)]
 pub struct Quiz {
     #[getset(get = "pub")]
-    id: isize,
+    id: usize,
     #[getset(get = "pub")]
     question: String,
     #[getset(get = "pub")]

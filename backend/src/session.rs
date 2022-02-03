@@ -3,7 +3,7 @@ use actix_web_actors::ws;
 use log::{debug, info, warn};
 
 use crate::{
-    message::{GetRoom, JoinRoom, LeaveRoom, WsMessage},
+    message::{GetRoom, JoinRoom, LeaveRoom, QuizStartRequest, WsMessage},
     room::QuizRoom,
     server::WsQuizServer,
 };
@@ -48,11 +48,15 @@ impl WsSession {
                             // ルーム加入リクエスト
                             .send(join_room_msg)
                             .into_actor(act)
-                            .then(|res, act, _ctx| {
-                                if let Ok((id, addr)) = res {
-                                    act.id = id;
-                                    act.room = room_name;
-                                    act.room_addr = Some(addr);
+                            .then(|res, act, ctx| {
+                                match res {
+                                    Ok(Ok((id, addr))) => {
+                                        act.id = id;
+                                        act.room = room_name;
+                                        act.room_addr = Some(addr);
+                                    }
+                                    Ok(Err(err_msg)) => ctx.text(err_msg),
+                                    _ => (),
                                 }
 
                                 fut::ready(())
@@ -65,6 +69,12 @@ impl WsSession {
                 .wait(ctx);
         };
     }
+
+    fn start_request(&mut self, _ctx: &mut ws::WebsocketContext<Self>) {
+        if let Some(addr) = self.room_addr.as_ref() {
+            addr.do_send(QuizStartRequest);
+        }
+    }
 }
 
 impl Actor for WsSession {
@@ -72,7 +82,7 @@ impl Actor for WsSession {
 
     fn started(&mut self, ctx: &mut Self::Context) {
         info!("WsSession connected");
-        self.join_room("Main", ctx);
+        self.join_room("debug", ctx);
     }
 
     fn stopped(&mut self, ctx: &mut Self::Context) {
@@ -127,6 +137,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                                 ctx.text("!!! room name is required");
                             }
                         }
+                        Some("/start") => self.start_request(ctx),
                         _ => warn!("Unknown command: {:?}", msg),
                     }
                 }
