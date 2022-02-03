@@ -3,49 +3,67 @@ use actix_web_actors::ws;
 use log::{debug, info, warn};
 
 use crate::{
-    message::{GetRoom, JoinRoom, WsMessage},
+    message::{GetRoom, JoinRoom, LeaveRoom, WsMessage},
+    room::QuizRoom,
     server::WsQuizServer,
 };
 
 #[derive(Default)]
-pub(crate) struct WsSession {
+pub struct WsSession {
     id: usize,
     room: String,
     name: Option<String>,
+    room_addr: Option<Addr<QuizRoom>>,
 }
 
 impl WsSession {
     fn join_room(&mut self, room_name: &str, ctx: &mut ws::WebsocketContext<Self>) {
-        let room_name = room_name.to_string();
+        let room_name = room_name.to_owned();
 
-        // TODO ルーム退室処理
+        // doneTODO ルーム退室処理
+        if let Some(room_addr) = self.room_addr.as_mut() {
+            let leave_msg = LeaveRoom { id: self.id };
 
-        todo!()
-        //     let room_addr = {
-        //         let get_room_msg = GetRoom {
-        //             room_name: room_name.to_owned(),
-        //         };
-        //         WsQuizServer::from_registry()
-        //             .send(get_room_msg)
-        //             .into_actor(self)
-        //             .then(|addr, act, _ctx| {
-        //                 if let Ok(room_addr) = addr {
-        //                     let join_room_msg = JoinRoom {
-        //                         room_name: room_name.to_owned(),
-        //                         name: self.name.clone(),
-        //                         addr: ctx.address().recipient()
-        //                     }
-        //                     room_addr.send(join_room_msg).into_actor(self).then(|a,s,f|
-        //                     {
-        //                         todo!()
-        //                 fut::ready(())
+            room_addr.do_send(leave_msg);
+            self.room_addr = None;
+        }
 
-        //                     })
-        //                 }
-        //                 fut::ready(())
-        //             })
-        //     }
-        //     .wait(ctx);
+        let room_addr = {
+            let get_room_msg = GetRoom {
+                room_name: room_name.to_owned(),
+            };
+
+            WsQuizServer::from_registry()
+                // ルーム情報取得
+                .send(get_room_msg)
+                .into_actor(self)
+                .then(|addr, act, ctx| {
+                    if let Ok(room_addr) = addr {
+                        let join_room_msg = JoinRoom {
+                            name: act.name.clone(),
+                            addr: ctx.address().recipient(),
+                        };
+
+                        room_addr
+                            // ルーム加入リクエスト
+                            .send(join_room_msg)
+                            .into_actor(act)
+                            .then(|res, act, _ctx| {
+                                if let Ok((id, addr)) = res {
+                                    act.id = id;
+                                    act.room = room_name;
+                                    act.room_addr = Some(addr);
+                                }
+
+                                fut::ready(())
+                            })
+                            .wait(ctx);
+                    }
+
+                    fut::ready(())
+                })
+                .wait(ctx);
+        };
     }
 }
 
@@ -54,6 +72,7 @@ impl Actor for WsSession {
 
     fn started(&mut self, ctx: &mut Self::Context) {
         info!("WsSession connected");
+        self.join_room("Main", ctx);
     }
 
     fn stopped(&mut self, ctx: &mut Self::Context) {
@@ -63,6 +82,13 @@ impl Actor for WsSession {
             self.id,
             self.room
         );
+
+        if let Some(room_addr) = self.room_addr.as_mut() {
+            let leave_msg = LeaveRoom { id: self.id };
+
+            room_addr.do_send(leave_msg);
+            self.room_addr = None;
+        }
     }
 }
 
@@ -94,7 +120,13 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                     let mut command = msg.splitn(2, ' ');
 
                     match command.next() {
-                        Some("/join") => if let Some(room_name) = command.next() {},
+                        Some("/join") => {
+                            if let Some(room_name) = command.next() {
+                                self.join_room(room_name, ctx)
+                            } else {
+                                ctx.text("!!! room name is required");
+                            }
+                        }
                         _ => warn!("Unknown command: {:?}", msg),
                     }
                 }

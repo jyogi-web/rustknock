@@ -7,10 +7,16 @@ use crate::room::QuizRoom;
 pub(crate) struct WsMessage(pub String);
 
 #[derive(Clone, Message)]
-#[rtype(result = "usize")]
+#[rtype(result = "(usize, Addr<QuizRoom>)")]
 pub(crate) struct JoinRoom {
     pub name: Option<String>,
     pub addr: Recipient<WsMessage>,
+}
+
+#[derive(Clone, Message)]
+#[rtype(result = "()")]
+pub(crate) struct LeaveRoom {
+    pub id: usize,
 }
 
 #[derive(Clone, Message)]

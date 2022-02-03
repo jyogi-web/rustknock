@@ -5,10 +5,12 @@ use std::{
 
 use actix_cors::Cors;
 use actix_files::Files;
-use actix_web::{middleware::Logger, web, App, HttpRequest, HttpServer};
+use actix_web::{middleware::Logger, web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web_actors::ws;
 use build_timestamp::build_time;
 use chrono::{FixedOffset, Utc};
 use log::LevelFilter;
+use rustknock_backend::session::WsSession;
 use simplelog::{
     ColorChoice, CombinedLogger, ConfigBuilder, SharedLogger, TermLogger, TerminalMode, WriteLogger,
 };
@@ -22,6 +24,10 @@ async fn index(req: HttpRequest) -> &'static str {
     println!("REQ: {:?}", req);
     println!("built on: {}", BUILD_TIME);
     BUILD_TIME
+}
+
+async fn ws_route(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
+    ws::start(WsSession::default(), &req, stream)
 }
 
 fn init_logger(log_path: Option<&str>) {
@@ -75,6 +81,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/").to(index))
             .service(quiz::quiz)
             .service(Files::new("/static", "./backend/static/").index_file("index.html"))
+            .service(web::resource("/ws/").to(ws_route))
     })
     .bind(("0.0.0.0", 3000))?
     .run()
