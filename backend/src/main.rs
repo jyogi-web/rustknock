@@ -70,8 +70,10 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .wrap(if cfg!(debug_assertions) {
+                // デバック時
                 Cors::permissive()
             } else {
+                // リリース時
                 Cors::default()
                     .allowed_origin("All")
                     .send_wildcard()
