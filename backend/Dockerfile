@@ -4,20 +4,19 @@ WORKDIR /app
 RUN cargo install cargo-watch
 COPY ./ ./
 
-# ビルド環境
-FROM rust:1.58.1 AS builder
+
+FROM rust:1.58.1-slim-bullseye AS production
 WORKDIR /app
 COPY ./Cargo.toml ./Cargo.toml
 RUN mkdir ./src
 RUN echo "fn main(){}" > ./src/main.rs
 RUN cargo build --release
-COPY ./src ./src
-COPY ./quizzes.json ./quizzes.json
 RUN rm -f ./target/release/deps/hello_actix*
+COPY ./src ./src
 RUN cargo build --release
-
-# 本番環境
-FROM rust:1.58.1-slim-bullseye
-COPY --from=builder /app/target/release/hello-actix /usr/local/bin/hello-actix
+RUN mv ./target/release/hello-actix /usr/local/bin
+RUN rm -rf ./src ./target
+# 外部ファイルとして読み込む系は以下で
+COPY ./quizzes.json ./quizzes.json
 EXPOSE 3000
 CMD ["hello-actix"]

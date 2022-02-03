@@ -1,8 +1,13 @@
 use actix_cors::Cors;
-use actix_web::{middleware::Logger, App, HttpServer};
+use actix_web::{middleware::Logger, web, App, HttpRequest, HttpServer};
 
 mod quiz;
 mod sample_ws;
+
+async fn index(req: HttpRequest) -> &'static str {
+    println!("REQ: {:?}", req);
+    "Hello world!"
+}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -16,6 +21,7 @@ async fn main() -> std::io::Result<()> {
                     .max_age(3600),
             )
             .wrap(Logger::default())
+            .service(web::resource("/").to(index))
             .service(quiz::quiz)
             .service(sample_ws::ws_index)
     })
