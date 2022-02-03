@@ -1,12 +1,16 @@
 use actix_cors::Cors;
 use actix_web::{middleware::Logger, web, App, HttpRequest, HttpServer};
+use build_timestamp::build_time;
 
 mod quiz;
 mod sample_ws;
 
+build_time!("%A %Y-%m-%d / %H:%M:%S");
+
 async fn index(req: HttpRequest) -> &'static str {
     println!("REQ: {:?}", req);
-    "Hello world!"
+    println!("built on: {}", BUILD_TIME);
+    BUILD_TIME
 }
 
 #[actix_web::main]
