@@ -19,6 +19,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    name: Build Job
 
     steps:
       - name: Checkout 🛎
@@ -99,7 +100,7 @@ jobs:
     needs: [build]
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
+    name: Deploy Job
     steps:
       - name: Download Web App 📦
         uses: actions/download-artifact@v2
