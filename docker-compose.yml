@@ -3,17 +3,18 @@ version: '3.7'
 services:
   backend:
     build:
-      context: ./backend
+      context: .
+      dockerfile: backend/Dockerfile
       target: 'develop-stage'
     environment:
       - RUST_BACKTRACE=1
     ports:
       - "3000:3000"
     volumes:
-      - ./backend:/app
+      - ./backend:/app/backend
       - cargo-cache:/usr/local/cargo/registry
       - target-cache:/app/target
-    command: /bin/sh -c "cargo watch -x run"
+    command: /bin/sh -c "cargo watch -x 'run --bin rustknock-backend'"
 
 volumes:
   cargo-cache:

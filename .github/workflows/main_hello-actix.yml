@@ -7,6 +7,10 @@ on:
   push:
     branches:
       - main
+    paths:
+      - './backend/**'
+      - './quiz_json/**'
+      - './quizzes.json'
   workflow_dispatch:
 
 jobs:
@@ -44,7 +48,7 @@ jobs:
         push: true
         tags: helloactix.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_381d46955a364ae59470fd6489486670 }}/helloactix:${{ github.sha }}
         file: ./backend/Dockerfile
-        context: ./backend
+        context: ./
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
 
