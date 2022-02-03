@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - main
-      - hotfix/cicd
     paths:
       - 'backend/**'
       - 'quiz_json/**'
