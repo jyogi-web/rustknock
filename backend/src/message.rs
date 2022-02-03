@@ -28,3 +28,7 @@ pub(crate) struct GetRoom {
 #[derive(Clone, Message)]
 #[rtype(result = "()")]
 pub(crate) struct QuizStartRequest;
+
+#[derive(Clone, Message)]
+#[rtype(result = "()")]
+pub(crate) struct DeleteUser(pub usize);
