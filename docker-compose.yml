@@ -11,7 +11,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./backend:/app/backend
+      - .:/app
       - cargo-cache:/usr/local/cargo/registry
       - target-cache:/app/target
     command: /bin/sh -c "cargo watch -x 'run --bin rustknock-backend'"
