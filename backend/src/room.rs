@@ -5,12 +5,22 @@ use getset::Getters;
 use log::info;
 use quiz_json::Quiz;
 
-use crate::message::JoinRoom;
+use crate::message::{JoinRoom, LeaveRoom};
 
 #[derive(Default, Getters)]
 pub(crate) struct User {
     name: String,
     score: usize,
+}
+
+impl User {
+    fn new(name: &str) -> Self {
+        let name = name.to_string();
+        Self {
+            name,
+            ..Default::default()
+        }
+    }
 }
 
 enum QuizLifecycle {
@@ -61,20 +71,36 @@ impl Actor for QuizRoom {
     }
 }
 
-// impl Handler<JoinRoom> for QuizRoom {
-//     type Result = MessageResult<JoinRoom>;
+impl Handler<JoinRoom> for QuizRoom {
+    type Result = MessageResult<JoinRoom>;
 
-//     fn handle(&mut self, msg: JoinRoom, ctx: &mut Self::Context) -> Self::Result {
-//         let JoinRoom { name, addr } = msg;
-//         let id = rand::random::<usize>();
-//         todo!();
+    fn handle(&mut self, msg: JoinRoom, ctx: &mut Self::Context) -> Self::Result {
+        let JoinRoom { name, addr } = msg;
+        let mut id = rand::random::<usize>();
 
-//         loop {
-//             if self.users.contains_key(&id) {
-//                 id = rand::random::<usize>();
-//             } else {
-//                 break;
-//             }
-//         }
-//     }
-// }
+        loop {
+            if self.users.contains_key(&id) {
+                id = rand::random::<usize>();
+            } else {
+                break;
+            }
+        }
+
+        let user = User::new(&name.unwrap_or_else(|| "anonymous".to_string()));
+        self.users.insert(id, user);
+
+        MessageResult((id, ctx.address()))
+    }
+}
+
+impl Handler<LeaveRoom> for QuizRoom {
+    type Result = ();
+
+    fn handle(&mut self, msg: LeaveRoom, _ctx: &mut Self::Context) -> Self::Result {
+        let LeaveRoom { id } = msg;
+
+        if let Some(_) = self.users.remove(&id) {
+            info!("Leave room: {} id: {}", &self.room_name, &id);
+        }
+    }
+}
