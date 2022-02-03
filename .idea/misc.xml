@@ -28,8 +28,12 @@
           <option name="fileUrl" value="file://$PROJECT_DIR$/README.md" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="0" />
+          <option name="caretOffset" value="274" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/.github/workflows/main_hello-actix.yml" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="0" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/backend/quizzes.json" />
         </OpenedFileInfo>
       </list>
     </option>
