@@ -5,6 +5,7 @@ RUN cargo install cargo-watch
 
 FROM rust:1.58.1-slim-bullseye AS production
 WORKDIR /app
+RUN apt update -y && apt install -y pkg-config libssl-dev
 COPY ./Cargo.toml ./Cargo.toml
 COPY ./backend/Cargo.toml ./backend/Cargo.toml
 COPY ./frontend/Cargo.toml ./frontend/Cargo.toml
