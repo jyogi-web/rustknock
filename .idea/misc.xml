@@ -8,16 +8,12 @@
           <option name="fileUrl" value="file://$PROJECT_DIR$/.github/workflows/azure-static-web-apps-lemon-pond-09fbd3f00.yml" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="843" />
+          <option name="caretOffset" value="1583" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/.idea/misc.xml" />
         </OpenedFileInfo>
         <OpenedFileInfo>
           <option name="caretOffset" value="264" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/.github/workflows/main_rustknock-server.yml" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="0" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/backend/quizzes.json" />
         </OpenedFileInfo>
         <OpenedFileInfo>
           <option name="caretOffset" value="0" />
@@ -28,8 +24,12 @@
           <option name="fileUrl" value="file://$PROJECT_DIR$/frontend/index.scss" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="0" />
+          <option name="caretOffset" value="81" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/frontend/index.html" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="0" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/backend/quizzes.json" />
         </OpenedFileInfo>
       </list>
     </option>
