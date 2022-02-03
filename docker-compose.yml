@@ -12,8 +12,6 @@ services:
       - "3000:3000"
     volumes:
       - ./backend:/app/backend
-      - ./frontend:/app/frontend
-      - ./quiz_json:/app/quiz_json
       - cargo-cache:/usr/local/cargo/registry
       - target-cache:/app/target
     command: /bin/sh -c "cargo watch -x 'run --bin rustknock-backend'"
