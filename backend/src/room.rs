@@ -15,6 +15,7 @@ use crate::message::{DeleteUser, JoinRoom, LeaveRoom, QuizStartRequest, WsMessag
 const QUIZ_QUESTION_NUMBER: usize = 5;
 const SELECT_QUIZZES_ENDPOINT: &'static str = "localhost:3000/quiz/";
 const DELAY_START: u64 = 5000;
+const QUIZ_LIMIT_TIME: u64 = 30;
 
 #[derive(Getters, Debug, Clone)]
 pub(crate) struct User {
@@ -37,6 +38,7 @@ impl User {
 enum QuizLifecycle {
     Ready,
     Starting,
+    AnswerWaiting,
     Started,
     DuringAnswer,
     Stopping,
@@ -94,7 +96,11 @@ impl QuizRoom {
     fn delay_send_quiz(&mut self, ms: u64, ctx: &mut Context<Self>) {
         let graceful_stop = GracefulStop::new();
         let delay_actor = DelayActor::new(
-            &self.quizzes.pop().unwrap_or_default().question(),
+            &format!(
+                "/question {} {}",
+                QUIZ_LIMIT_TIME,
+                self.quizzes.pop().unwrap_or_default().question()
+            ),
             self.users.clone(),
             ctx.address().recipient(),
             DELAY_START,
@@ -115,10 +121,10 @@ impl Actor for QuizRoom {
     type Context = Context<Self>;
 
     fn started(&mut self, _ctx: &mut Self::Context) {
-        info!("New quiz room {} started", &self.room_name);
+        info!("New quiz {} room started", &self.room_name);
     }
     fn stopped(&mut self, _ctx: &mut Self::Context) {
-        info!("Quiz room {} stopped", &self.room_name);
+        info!("Quiz {} room stopped", &self.room_name);
     }
 }
 
@@ -160,7 +166,7 @@ impl Handler<LeaveRoom> for QuizRoom {
         let LeaveRoom { id } = msg;
 
         if let Some(_) = self.users.remove(&id) {
-            info!("Leave room: {} id: {}", &self.room_name, &id);
+            info!("Leave {} room id: {}", &self.room_name, &id);
         }
     }
 }
@@ -252,7 +258,11 @@ impl Actor for DelayActor {
     type Context = Context<Self>;
 
     fn started(&mut self, _ctx: &mut Self::Context) {
-        debug!("DelayActor start {:?}", self);
+        debug!("DelayActor started {:?}", self);
+    }
+
+    fn stopped(&mut self, ctx: &mut Self::Context) {
+        debug!("DelayActor stoped {:?}", self);
     }
 }
 
