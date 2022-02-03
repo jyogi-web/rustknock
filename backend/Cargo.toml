@@ -24,4 +24,5 @@ rand = "0.8.4"
 simplelog = "0.11.2"
 tokio = {version = "1.16.1", features = ["time"]}
 
+getset = "0.1.2"
 quiz_json = {path = "../quiz_json"}

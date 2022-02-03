@@ -32,7 +32,11 @@ fn init_logger(log_path: Option<&str>) {
     let mut logger: Vec<Box<dyn SharedLogger>> = vec![
         #[cfg(not(feature = "termcolor"))]
         TermLogger::new(
-            LevelFilter::Debug,
+            if cfg!(debug_assertions) {
+                LevelFilter::Debug
+            } else {
+                LevelFilter::Info
+            },
             ConfigBuilder::new().set_time_to_local(true).build(),
             TerminalMode::Mixed,
             ColorChoice::Auto,
