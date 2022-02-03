@@ -38,9 +38,10 @@ impl User {
 enum QuizLifecycle {
     Ready,
     Starting,
-    AnswerWaiting,
     Started,
-    DuringAnswer,
+    AnswerRightWaiting,
+    AnswerWaiting,
+    Result,
     Stopping,
     Stopped,
 }
