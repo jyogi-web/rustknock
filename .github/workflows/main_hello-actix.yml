@@ -6,11 +6,12 @@ name: Build and deploy container app to Azure Web App - hello-actix
 on:
   push:
     branches:
-      - main
+#      - main
+      - hotfix/cicd
     paths:
-      - './backend/**'
-      - './quiz_json/**'
-      - './quizzes.json'
+      - 'backend/**'
+      - 'quiz_json/**'
+      - 'quizzes.json'
   workflow_dispatch:
 
 jobs:
