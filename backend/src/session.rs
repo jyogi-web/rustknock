@@ -48,11 +48,15 @@ impl WsSession {
                             // ルーム加入リクエスト
                             .send(join_room_msg)
                             .into_actor(act)
-                            .then(|res, act, _ctx| {
-                                if let Ok((id, addr)) = res {
-                                    act.id = id;
-                                    act.room = room_name;
-                                    act.room_addr = Some(addr);
+                            .then(|res, act, ctx| {
+                                match res {
+                                    Ok(Ok((id, addr))) => {
+                                        act.id = id;
+                                        act.room = room_name;
+                                        act.room_addr = Some(addr);
+                                    }
+                                    Ok(Err(err_msg)) => ctx.text(err_msg),
+                                    _ => (),
                                 }
 
                                 fut::ready(())
@@ -72,7 +76,7 @@ impl Actor for WsSession {
 
     fn started(&mut self, ctx: &mut Self::Context) {
         info!("WsSession connected");
-        self.join_room("Main", ctx);
+        // self.join_room("Main", ctx);
     }
 
     fn stopped(&mut self, ctx: &mut Self::Context) {

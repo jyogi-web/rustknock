@@ -10,12 +10,11 @@ use actix_web_actors::ws;
 use build_timestamp::build_time;
 use chrono::{FixedOffset, Utc};
 use log::LevelFilter;
-use rustknock_backend::session::WsSession;
+use rustknock_backend::{quiz, session::WsSession};
 use simplelog::{
     ColorChoice, CombinedLogger, ConfigBuilder, SharedLogger, TermLogger, TerminalMode, WriteLogger,
 };
 
-mod quiz;
 mod sample_ws;
 
 build_time!("%A %Y-%m-%d / %H:%M:%S");
@@ -82,6 +81,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .service(web::resource("/").to(index))
             .service(quiz::quiz)
+            .service(quiz::get_quiz_num)
             .service(Files::new("/static", "./backend/static/").index_file("index.html"))
             .service(web::resource("/ws/").to(ws_route))
     })

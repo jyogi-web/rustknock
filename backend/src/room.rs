@@ -5,20 +5,25 @@ use getset::Getters;
 use log::info;
 use quiz_json::Quiz;
 
-use crate::message::{JoinRoom, LeaveRoom};
+use crate::message::{JoinRoom, LeaveRoom, QuizStartRequest, WsMessage};
 
-#[derive(Default, Getters)]
+const QUIZ_QUESTION_NUMBER: usize = 5;
+const select_quizzes_endpoint: &'static str = "localhost:3000/quiz/";
+
+#[derive(Getters)]
 pub(crate) struct User {
     name: String,
     score: usize,
+    addr: Recipient<WsMessage>,
 }
 
 impl User {
-    fn new(name: &str) -> Self {
+    fn new(name: &str, addr: Recipient<WsMessage>) -> Self {
         let name = name.to_string();
         Self {
             name,
-            ..Default::default()
+            score: 0,
+            addr,
         }
     }
 }
@@ -44,6 +49,7 @@ pub(crate) struct QuizRoom {
     #[getset(get = "pub")]
     users: HashMap<usize, User>,
     state: QuizLifecycle,
+    quizzes: Vec<Quiz>,
 }
 
 impl QuizRoom {
@@ -75,6 +81,15 @@ impl Handler<JoinRoom> for QuizRoom {
     type Result = MessageResult<JoinRoom>;
 
     fn handle(&mut self, msg: JoinRoom, ctx: &mut Self::Context) -> Self::Result {
+        // readyでなければ加入を弾く
+        if let QuizLifecycle::Ready = self.state {
+        } else {
+            return MessageResult(Err(format!(
+                "!!! The quiz has already started in {} room",
+                self.room_name
+            )));
+        }
+
         let JoinRoom { name, addr } = msg;
         let mut id = rand::random::<usize>();
 
@@ -86,10 +101,10 @@ impl Handler<JoinRoom> for QuizRoom {
             }
         }
 
-        let user = User::new(&name.unwrap_or_else(|| "anonymous".to_string()));
+        let user = User::new(&name.unwrap_or_else(|| "anonymous".to_string()), addr);
         self.users.insert(id, user);
 
-        MessageResult((id, ctx.address()))
+        MessageResult(Ok((id, ctx.address())))
     }
 }
 
@@ -101,6 +116,25 @@ impl Handler<LeaveRoom> for QuizRoom {
 
         if let Some(_) = self.users.remove(&id) {
             info!("Leave room: {} id: {}", &self.room_name, &id);
+        }
+    }
+}
+
+impl Handler<QuizStartRequest> for QuizRoom {
+    type Result = ();
+
+    fn handle(&mut self, _msg: QuizStartRequest, ctx: &mut Self::Context) -> Self::Result {
+        match self.state {
+            QuizLifecycle::Ready => self.state = QuizLifecycle::Starting,
+            _ => (),
+        }
+
+        let res = reqwest::blocking::get(format!(
+            "{}{}",
+            select_quizzes_endpoint, QUIZ_QUESTION_NUMBER
+        ));
+        if let Ok(res) = res {
+            self.quizzes = res.json().unwrap_or_default();
         }
     }
 }
