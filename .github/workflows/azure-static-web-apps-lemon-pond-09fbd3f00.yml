@@ -4,22 +4,101 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'frontend/**'
+      - 'Trunk.toml'
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
+    paths:
+      - 'frontend/**'
+      - 'Trunk.toml'
+  workflow_dispatch:
 
 jobs:
-  build_and_deploy_job:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@v2
+
+      - name: Cache Cargo 📦
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install rustfmt, clippy
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-unknown-linux-gnu
+          components: rustfmt, clippy
+          override: true
+
+      - name: rustup target add wasm32-unknown-unknown
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+          profile: minimal
+
+      - name: Install trunk 🧳
+        uses: jetli/trunk-action@v0.1.0
+        with:
+          version: 'latest'
+
+      - name: Install wasm-bindgen
+        uses: jetli/wasm-bindgen-action@v0.1.0
+        with:
+          version: 'latest'
+
+      - name: cargo fmt --all -- --check
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+      - name: cargo clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+
+      - name: cargo test --release --all-features
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --release --all-features
+
+
+      - name: Build Web App
+        run: |
+          trunk build --release
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: webapp_artifact
+          path: |
+            frontend/dist
+
+  deploy:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v2
+      - name: Download Web App 📦
+        uses: actions/download-artifact@v2
         with:
-          submodules: true
-      - name: Build And Deploy
-        id: builddeploy
+          name: webapp_artifact
+          path: ./
+      - name: Deploy 🚀
+        id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LEMON_POND_09FBD3F00 }}
@@ -27,9 +106,9 @@ jobs:
           action: "upload"
           ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
           # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "/frontend" # App source code path
+          app_location: "/" # App source code path
           api_location: "" # Api source code path - optional
-          output_location: "/frontend/dist" # Built app content directory - optional
+          output_location: "/dist" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
@@ -37,7 +116,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Close Pull Request Job
     steps:
-      - name: Close Pull Request
+      - name: Close Pull Request 🚫
         id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:

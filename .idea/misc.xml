@@ -4,36 +4,12 @@
     <option name="openedFilesInfos">
       <list>
         <OpenedFileInfo>
-          <option name="caretOffset" value="0" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/frontend/src/main.rs" />
+          <option name="caretOffset" value="3354" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/.github/workflows/azure-static-web-apps-lemon-pond-09fbd3f00.yml" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="286" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/frontend/index.scss" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="0" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/README.md" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="274" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/.github/workflows/main_hello-actix.yml" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="525" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/backend/quizzes.json" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="0" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/frontend/src/app.rs" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="268" />
+          <option name="caretOffset" value="3235" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/.github/workflows/azure-static-web-apps.yml" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="336" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/frontend/index.html" />
         </OpenedFileInfo>
       </list>
     </option>
