@@ -58,7 +58,7 @@ jobs:
       if: always()
       with:
         type: ${{ job.status }}
-        job_name: "*Build hello-actix*"
+        job_name: "*Build RustKnock's Backend*"
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
@@ -84,6 +84,6 @@ jobs:
       if: always()
       with:
         type: ${{ job.status }}
-        job_name: "*Deploy hello-actix to Azure Web App*"
+        job_name: "*Deploy RustKnock's Backend to Azure App Service*"
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
