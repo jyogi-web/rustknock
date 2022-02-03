@@ -11,6 +11,26 @@
           <option name="caretOffset" value="3235" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/.github/workflows/azure-static-web-apps.yml" />
         </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="0" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/frontend/src/main.rs" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="286" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/frontend/index.scss" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="336" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/frontend/index.html" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="0" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/README.md" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="0" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/.github/workflows/main_hello-actix.yml" />
+        </OpenedFileInfo>
       </list>
     </option>
   </component>
