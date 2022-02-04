@@ -10,7 +10,10 @@ use getset::Getters;
 use log::{debug, info, warn};
 use quiz_json::Quiz;
 
-use crate::message::{DeleteUser, JoinRoom, LeaveRoom, QuizStartRequest, WsMessage};
+use crate::message::{
+    AnswerRequest, AnswerRightRequest, DelayNotification, DeleteUser, JoinRoom, LeaveRoom,
+    QuizStartRequest, WsMessage,
+};
 
 const QUIZ_QUESTION_NUMBER: usize = 5;
 const SELECT_QUIZZES_ENDPOINT: &'static str = "localhost:3000/quiz/";
@@ -35,9 +38,9 @@ impl User {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
 enum QuizLifecycle {
     Ready,
-    Starting,
     Started,
     AnswerRightWaiting,
     AnswerWaiting,
@@ -54,13 +57,16 @@ impl Default for QuizLifecycle {
 
 type Users = HashMap<usize, User>;
 
-#[derive(Default, Getters)]
+#[derive(Default, Getters, Debug)]
 pub(crate) struct QuizRoom {
     room_name: String,
     #[getset(get = "pub")]
     users: Users,
     state: QuizLifecycle,
     quizzes: Vec<Quiz>,
+    current_quiz_number: u32,
+    current_quiz: Option<Quiz>,
+    during_answer_id: Option<usize>,
 }
 
 impl QuizRoom {
@@ -94,19 +100,21 @@ impl QuizRoom {
         Some(())
     }
 
-    fn delay_send_quiz(&mut self, ms: u64, ctx: &mut Context<Self>) {
+    fn broadcast_message_with_filter(&mut self, msg: &str, filter_id: usize) -> Option<()> {
+        let mut users = self.take_user()?;
+
+        for (id, user) in users.drain() {
+            if id != filter_id && user.addr.do_send(WsMessage(msg.to_string())).is_ok() {
+                self.add_user(id, user);
+            }
+        }
+
+        Some(())
+    }
+
+    fn delay_notification(&mut self, ms: u64, ctx: &mut Context<Self>) {
         let graceful_stop = GracefulStop::new();
-        let delay_actor = DelayActor::new(
-            &format!(
-                "/question {} {}",
-                QUIZ_LIMIT_TIME,
-                self.quizzes.pop().unwrap_or_default().question()
-            ),
-            self.users.clone(),
-            ctx.address().recipient(),
-            DELAY_START,
-        )
-        .start();
+        let delay_actor = DelayActor::new(ctx.address(), ms).start();
         let delayer = Delayer::new(
             delay_actor.recipient(),
             graceful_stop.clone_system_terminator(),
@@ -177,6 +185,8 @@ impl Handler<QuizStartRequest> for QuizRoom {
 
     fn handle(&mut self, _msg: QuizStartRequest, ctx: &mut Self::Context) -> Self::Result {
         if let QuizLifecycle::Ready = self.state {
+            // 問題をリクエスト
+            // NOTE ローカルで実装しているAPIから取得しているがここだけ外部に移行してもいいかも
             let res = reqwest::blocking::get(format!(
                 "http://{}{}",
                 SELECT_QUIZZES_ENDPOINT, QUIZ_QUESTION_NUMBER
@@ -190,11 +200,12 @@ impl Handler<QuizStartRequest> for QuizRoom {
                 debug!("{:?}", &self.quizzes);
             }
 
-            self.broadcast_message(&format!("/started"));
-            self.delay_send_quiz(DELAY_START, ctx);
+            // クイズセクション開始を合図
+            self.broadcast_message(&format!("/quiz_started"));
+            self.delay_notification(DELAY_START, ctx);
 
             info!("Start quiz in {} room", &self.room_name);
-            self.state = QuizLifecycle::Starting;
+            self.state = QuizLifecycle::Started;
         }
     }
 }
@@ -211,39 +222,100 @@ impl Handler<DeleteUser> for QuizRoom {
     }
 }
 
+impl Handler<DelayNotification> for QuizRoom {
+    type Result = ();
+
+    fn handle(&mut self, msg: DelayNotification, ctx: &mut Self::Context) -> Self::Result {
+        match self.state {
+            QuizLifecycle::Ready => (),
+            QuizLifecycle::Started => {
+                self.current_quiz_number += 1;
+                let question = self.quizzes.pop().unwrap_or_default();
+
+                self.broadcast_message(&format!(
+                    "/question {} {}",
+                    QUIZ_LIMIT_TIME,
+                    question.question()
+                ));
+                self.current_quiz = Some(question);
+                self.state = QuizLifecycle::AnswerRightWaiting;
+                self.delay_notification(QUIZ_LIMIT_TIME, ctx);
+            }
+            QuizLifecycle::AnswerRightWaiting => {}
+            QuizLifecycle::AnswerWaiting => {}
+            QuizLifecycle::Result => {}
+            _ => (),
+        }
+    }
+}
+
+impl Handler<AnswerRightRequest> for QuizRoom {
+    type Result = MessageResult<AnswerRightRequest>;
+
+    fn handle(&mut self, msg: AnswerRightRequest, ctx: &mut Self::Context) -> Self::Result {
+        let AnswerRightRequest(id) = msg;
+        if let QuizLifecycle::AnswerRightWaiting = self.state {
+            self.state = QuizLifecycle::AnswerWaiting;
+            self.during_answer_id = Some(id);
+            self.broadcast_message_with_filter("/ans_lock", id);
+
+            return MessageResult(Ok(()));
+        }
+
+        MessageResult(Err("/ans_err".to_string()))
+    }
+}
+
+impl Handler<AnswerRequest> for QuizRoom {
+    type Result = MessageResult<AnswerRequest>;
+
+    fn handle(&mut self, msg: AnswerRequest, _ctx: &mut Self::Context) -> Self::Result {
+        let AnswerRequest { id, answer } = msg;
+
+        if self.state == QuizLifecycle::AnswerWaiting
+            && self.during_answer_id.unwrap_or_default() == id
+        {
+            if self.current_quiz.as_ref().unwrap().answer() == &answer {
+                if let Some(user) = self.users.get_mut(&id) {
+                    user.score += 1;
+                    info!("正解 id:{} score:{} ans:{}", id, user.score, answer);
+                }
+                return MessageResult(Ok(()));
+            }
+        }
+
+        MessageResult(Err("/incorrect".to_string()))
+    }
+}
+
 #[derive(Debug)]
 pub struct DelayActor {
-    msg: String,
-    users: Users,
-    room_addr: Recipient<DeleteUser>,
+    room_addr: Addr<QuizRoom>,
     delay_ms: u64,
     is_first_execution: bool,
 }
 
 impl DelayActor {
-    fn new(msg: &str, users: Users, room_addr: Recipient<DeleteUser>, delay_ms: u64) -> Self {
-        let msg = msg.to_string();
+    fn new(room_addr: Addr<QuizRoom>, delay_ms: u64) -> Self {
         Self {
-            msg,
-            users,
             room_addr,
             delay_ms,
             is_first_execution: true,
         }
     }
 
-    fn broadcast_message(&mut self) -> Option<()> {
-        for (id, user) in self.users.drain() {
-            if user.addr.do_send(WsMessage(self.msg.to_string())).is_err() {
-                match self.room_addr.do_send(DeleteUser(id.to_owned())) {
-                    Ok(_) => (),
-                    Err(err) => warn!("Error failed to do_send: {}", err),
-                }
-            }
-        }
+    // fn broadcast_message(&mut self) -> Option<()> {
+    //     for (id, user) in self.users.drain() {
+    //         if user.addr.do_send(WsMessage(self.msg.to_string())).is_err() {
+    //             match self.room_addr.do_send(DeleteUser(id.to_owned())) {
+    //                 Ok(_) => (),
+    //                 Err(err) => warn!("Error failed to do_send: {}", err),
+    //             }
+    //         }
+    //     }
 
-        Some(())
-    }
+    //     Some(())
+    // }
 }
 
 impl Default for DelayActor {
@@ -275,10 +347,11 @@ impl Handler<Task> for DelayActor {
             msg.0
                 .do_send(Timing::Later(Duration::from_millis(self.delay_ms)));
             self.is_first_execution = false;
-            debug!("first delay task");
+            debug!("First delay task");
         } else {
-            self.broadcast_message();
-            debug!("問題配信");
+            // self.broadcast_message();
+            self.room_addr.do_send(DelayNotification);
+            debug!("Send delay notification");
             ctx.stop();
         }
     }
