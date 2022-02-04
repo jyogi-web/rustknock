@@ -17,8 +17,9 @@ use crate::message::{
 
 const QUIZ_QUESTION_NUMBER: usize = 5;
 const SELECT_QUIZZES_ENDPOINT: &'static str = "localhost:3000/quiz/";
-const DELAY_START: u64 = 5000;
-const QUIZ_LIMIT_TIME: u64 = 30;
+const DELAY_START_MS: u64 = 5000;
+const QUIZ_LIMIT_TIME_MS: u64 = 6000;
+const INTERVAL_OF_QUIZ_MS: u64 = 5000;
 
 #[derive(Getters, Debug, Clone)]
 pub(crate) struct User {
@@ -102,7 +103,7 @@ impl QuizRoom {
 
     fn broadcast_message_with_filter(&mut self, msg: &str, filter_id: usize) -> Option<()> {
         let mut users = self.take_user()?;
-
+        // BUG 送ってないユーザが消えてる
         for (id, user) in users.drain() {
             if id != filter_id && user.addr.do_send(WsMessage(msg.to_string())).is_ok() {
                 self.add_user(id, user);
@@ -162,6 +163,7 @@ impl Handler<JoinRoom> for QuizRoom {
         }
 
         let user = User::new(&name.unwrap_or_else(|| "anonymous".to_string()), addr);
+        debug!("Join id {} in {} room", &id, self.room_name);
         self.users.insert(id, user);
 
         MessageResult(Ok((id, ctx.address())))
@@ -176,6 +178,10 @@ impl Handler<LeaveRoom> for QuizRoom {
 
         if let Some(_) = self.users.remove(&id) {
             info!("Leave {} room id: {}", &self.room_name, &id);
+            if self.state == QuizLifecycle::AnswerWaiting && self.during_answer_id == Some(id) {
+                self.state = QuizLifecycle::AnswerRightWaiting;
+                self.during_answer_id = None;
+            }
         }
     }
 }
@@ -202,7 +208,7 @@ impl Handler<QuizStartRequest> for QuizRoom {
 
             // クイズセクション開始を合図
             self.broadcast_message(&format!("/quiz_started"));
-            self.delay_notification(DELAY_START, ctx);
+            self.delay_notification(DELAY_START_MS, ctx);
 
             info!("Start quiz in {} room", &self.room_name);
             self.state = QuizLifecycle::Started;
@@ -218,6 +224,7 @@ impl Handler<DeleteUser> for QuizRoom {
 
         if self.users.contains_key(&id) {
             self.users.remove(&id).unwrap();
+            debug!("delete user id {}", &id);
         }
     }
 }
@@ -234,12 +241,12 @@ impl Handler<DelayNotification> for QuizRoom {
 
                 self.broadcast_message(&format!(
                     "/question {} {}",
-                    QUIZ_LIMIT_TIME,
+                    QUIZ_LIMIT_TIME_MS,
                     question.question()
                 ));
                 self.current_quiz = Some(question);
                 self.state = QuizLifecycle::AnswerRightWaiting;
-                self.delay_notification(QUIZ_LIMIT_TIME, ctx);
+                self.delay_notification(QUIZ_LIMIT_TIME_MS, ctx);
             }
             QuizLifecycle::AnswerRightWaiting => {}
             QuizLifecycle::AnswerWaiting => {}
@@ -269,7 +276,7 @@ impl Handler<AnswerRightRequest> for QuizRoom {
 impl Handler<AnswerRequest> for QuizRoom {
     type Result = MessageResult<AnswerRequest>;
 
-    fn handle(&mut self, msg: AnswerRequest, _ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: AnswerRequest, ctx: &mut Self::Context) -> Self::Result {
         let AnswerRequest { id, answer } = msg;
 
         if self.state == QuizLifecycle::AnswerWaiting
@@ -279,8 +286,23 @@ impl Handler<AnswerRequest> for QuizRoom {
                 if let Some(user) = self.users.get_mut(&id) {
                     user.score += 1;
                     info!("正解 id:{} score:{} ans:{}", id, user.score, answer);
+                } else {
+                    debug!("ここには入らないはず id {} users {:?}", id, self.users);
                 }
+                self.state = QuizLifecycle::Started;
+                self.broadcast_message_with_filter(
+                    &format!("/others_correct_answer {} {}", &id, &answer),
+                    id,
+                );
+                self.broadcast_message_with_filter("/ans_unlock", id);
+                self.delay_notification(INTERVAL_OF_QUIZ_MS, ctx);
                 return MessageResult(Ok(()));
+            } else {
+                self.broadcast_message_with_filter("/ans_unlock", id);
+                self.broadcast_message_with_filter(
+                    &format!("/others_incorrect_answer {} {}", &id, &answer),
+                    id,
+                );
             }
         }
 
