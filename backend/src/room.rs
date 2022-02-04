@@ -104,7 +104,13 @@ impl QuizRoom {
     fn broadcast_message_with_filter(&mut self, msg: &str, filter_id: usize) -> Option<()> {
         let mut users = self.take_user()?;
         // BUG 送ってないユーザが消えてる
+
         for (id, user) in users.drain() {
+            // WARN バグの暫定対応
+            if id == filter_id {
+                self.add_user(id, user);
+            }
+
             if id != filter_id && user.addr.do_send(WsMessage(msg.to_string())).is_ok() {
                 self.add_user(id, user);
             }
