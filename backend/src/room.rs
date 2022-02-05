@@ -261,14 +261,15 @@ impl Handler<DelayNotification> for QuizRoom {
                     self.delay_notification(QUIZ_LIMIT_TIME_MS, ctx);
                 } else {
                     info!("結果発表にいくよ");
-                    self.state = QuizLifecycle::Ready;
+                    self.state = QuizLifecycle::Result;
+                    self.delay_notification(INTERVAL_OF_QUIZ_MS, ctx);
                 }
             }
-            QuizLifecycle::AnswerRightWaiting => {
+            QuizLifecycle::AnswerRightWaiting | QuizLifecycle::AnswerWaiting => {
                 info!("時間切れ");
                 self.state = QuizLifecycle::Started;
+                self.delay_notification(INTERVAL_OF_QUIZ_MS, ctx);
             }
-            QuizLifecycle::AnswerWaiting => {}
             QuizLifecycle::Result => {
                 info!("けっかはっぴょぉおおおおおおおおおおおおお");
                 self.broadcast_message("/result");
@@ -317,6 +318,7 @@ impl Handler<AnswerRequest> for QuizRoom {
                 } else {
                     debug!("ここには入らないはず id {} users {:?}", id, self.users);
                 }
+                self.during_answer_id = None;
                 self.state = QuizLifecycle::Started;
                 self.broadcast_message_with_filter(
                     &format!("/others_correct_answer {} {}", &id, &answer),
@@ -326,6 +328,8 @@ impl Handler<AnswerRequest> for QuizRoom {
                 self.delay_notification(INTERVAL_OF_QUIZ_MS, ctx);
                 return MessageResult(Ok(()));
             } else {
+                self.during_answer_id = None;
+                self.state = QuizLifecycle::AnswerRightWaiting;
                 self.broadcast_message_with_filter("/ans_unlock", id);
                 self.broadcast_message_with_filter(
                     &format!("/others_incorrect_answer {} {}", &id, &answer),
