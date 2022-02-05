@@ -9,43 +9,49 @@
   },
   {
     "id": 2,
-    "question": "これは問題２です",
+    "question": "楚蟹はなんと読む？ひらがな五文字で答えよ",
     "answers": [
-      "2"
+      "ずわいがに"
     ],
-    "explanatory": "ええええええええええええええ"
+    "explanatory": "「楚」という字には「いばら」という意味がある"
   },
   {
     "id": 3,
-    "question": "これは問題３です",
+    "question": "船、飛行機、列車などの積み荷を表す英単語で、プログラミング言語Rustのビルドシステムの名称は何？",
     "answers": [
-      "3"
+      "cargo",
+      "Cargo"
     ],
-    "explanatory": "ええええええええええええええ"
+    "explanatory": "Cargoは、Rustのビルドシステム兼、パッケージマネージャです。"
   },
   {
     "id": 4,
-    "question": "これは問題４です",
+    "question": "とある言語を検索する際に出現する、オープンワールドサバイバルゲームは何？",
     "answers": [
-      "4"
+      "Rust",
+      "rust"
     ],
-    "explanatory": "ええええええええええええええ"
+    "explanatory": "他の言語でもありそうだよね"
   },
   {
     "id": 5,
-    "question": "これは問題５です",
+    "question": "プログラミングRustに置ける３つの重要な概念のうち、「所有権」、「借用」、あと１つは何？",
     "answers": [
-      "5"
+      "ライフタイム",
+      "らいふたいむ",
+      "lifetime",
+      "Lifetime"
     ],
-    "explanatory": "ええええええええええええええ"
+    "explanatory": "ライフタイムわからん"
   },
   {
     "id": 6,
-    "question": "これは問題６です",
+    "question": "Stack Overflowの調査で5年連続で開発者から愛されている言語第1位のプログラミング言語は何？",
     "answers": [
-      "6"
+      "Rust",
+      "rust"
     ],
-    "explanatory": "ええええええええええええええ"
+    "explanatory": "Rustの回し者"
   },
   {
     "id": 7,
