@@ -1,24 +1,16 @@
 use wasm_bindgen::JsCast;
 
 use yew::prelude::*;
+use yew::{events::Event, html};
 
-use yew::{events::Event, html, Component, Context, Html};
-use {
-    futures::prelude::*,
-    log::*,
-    pharos::{Observable, ObserveConfig},
-    wasm_bindgen::prelude::*,
-    ws_stream_wasm::*,
-};
+use {futures::prelude::*, log::*, wasm_bindgen::prelude::*, ws_stream_wasm::*};
 
 use wasm_bindgen_futures::spawn_local;
-use web_sys::{EventTarget, HtmlInputElement, InputEventInit};
+use web_sys::{EventTarget, HtmlInputElement};
 
 const URL: &str = "ws://127.0.0.1:3000/ws/";
 
 async fn join_room(roomname: String, username: String) {
-    // let _ = console_log::init_with_level(Level::Trace);
-
     // info!はwasm-loggerのマクロだよ！
     info!("run: join_room");
 
@@ -26,21 +18,10 @@ async fn join_room(roomname: String, username: String) {
         .await
         .expect_throw("Could not create websocket");
     info!("Update: {:?}", ws.ready_state());
-
-    // ちょっとよくわかんない
-    // let mut evts = ws.observe(ObserveConfig::default()).await.expect("observe");
-
     wsio.send(WsMessage::Text(format!("/join {}", roomname)));
     wsio.send(WsMessage::Text(format!("/name {}", username)));
     info!("/join {:?}", roomname);
     info!("/name {:?}", username);
-
-    // ws.close().await.expect_throw("close ws");
-    // info!("Update: {:?}", ws.ready_state());
-
-    // なにしてるんだろうね
-    // assert!(evts.next().await.unwrap_throw().is_closing());
-    // assert!(evts.next().await.unwrap_throw().is_closed());
 }
 
 #[function_component(Welcome)]
