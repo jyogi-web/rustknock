@@ -3,7 +3,10 @@ use actix_web_actors::ws;
 use log::{debug, info, warn};
 
 use crate::{
-    message::{GetRoom, JoinRoom, LeaveRoom, QuizStartRequest, WsMessage},
+    message::{
+        AnswerRequest, AnswerRightRequest, GetRoom, JoinRoom, LeaveRoom, QuizStartRequest,
+        WsMessage,
+    },
     room::QuizRoom,
     server::WsQuizServer,
 };
@@ -54,8 +57,10 @@ impl WsSession {
                                         act.id = id;
                                         act.room = room_name;
                                         act.room_addr = Some(addr);
+
+                                        ctx.text("/join_ok");
                                     }
-                                    Ok(Err(err_msg)) => ctx.text(err_msg),
+                                    Ok(Err(_err_msg)) => ctx.text("/join_err"),
                                     _ => (),
                                 }
 
@@ -73,6 +78,43 @@ impl WsSession {
     fn start_request(&mut self, _ctx: &mut ws::WebsocketContext<Self>) {
         if let Some(addr) = self.room_addr.as_ref() {
             addr.do_send(QuizStartRequest);
+        }
+    }
+
+    fn answer_right_request(&mut self, ctx: &mut ws::WebsocketContext<Self>) {
+        if let Some(addr) = self.room_addr.as_ref() {
+            addr.send(AnswerRightRequest(self.id.to_owned()))
+                .into_actor(self)
+                .then(|res, _act, ctx| {
+                    match res {
+                        Ok(Ok(_)) => ctx.text("/ans_ok"),
+                        Ok(Err(_err_msg)) => ctx.text("/ans_err"),
+                        _ => (),
+                    }
+
+                    fut::ready(())
+                })
+                .wait(ctx);
+        }
+    }
+
+    fn answer_request(&mut self, ans: &str, ctx: &mut ws::WebsocketContext<Self>) {
+        if let Some(addr) = self.room_addr.as_ref() {
+            addr.send(AnswerRequest {
+                id: self.id.to_owned(),
+                answer: ans.to_string(),
+            })
+            .into_actor(self)
+            .then(|res, _act, ctx| {
+                match res {
+                    Ok(Ok(_)) => ctx.text("/correct"),
+                    Ok(Err(_err_msg)) => ctx.text("/incorrect"),
+                    _ => (),
+                }
+
+                fut::ready(())
+            })
+            .wait(ctx);
         }
     }
 }
@@ -138,6 +180,14 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                             }
                         }
                         Some("/start") => self.start_request(ctx),
+                        Some("/ans_req") => self.answer_right_request(ctx),
+                        Some("/answer") => {
+                            if let Some(answer) = command.next() {
+                                self.answer_request(answer, ctx);
+                            } else {
+                                ctx.text("!!! room name is required");
+                            }
+                        }
                         _ => warn!("Unknown command: {:?}", msg),
                     }
                 }

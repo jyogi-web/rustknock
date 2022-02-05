@@ -20,7 +20,7 @@ pub struct Quiz {
     #[getset(get = "pub")]
     question: String,
     #[getset(get = "pub")]
-    answer: String,
+    answers: Vec<String>,
     #[getset(get = "pub")]
     explanatory: String,
 }
