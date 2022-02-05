@@ -1,13 +1,19 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-interface Props {}
+interface Props {
+  sendJoin: (roomName: string) => void;
+  sendName: (name: string) => void;
+  setIsWelcomeFalse: () => void;
+}
 
 const Welcome: React.FC<Props> = (props) => {
   const { register, watch, handleSubmit, formState: { errors } } = useForm();
 
   const onClickHandler = () => {
-    console.log(`emit roomname: ${watch("roomname")}, username: ${watch("username")}`);
+    props.sendJoin(watch("roomname"));
+    props.sendName(watch("username"));
+    props.setIsWelcomeFalse();
+    console.log(`emit sendJoin(${watch("roomname")}); sendName(${watch("username")})`);
   }
 
   return (
@@ -22,7 +28,7 @@ const Welcome: React.FC<Props> = (props) => {
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="roomname" className="sr-only">{"ルーム名"}</label>
-              <input {...register("roomname", { required: true })} type="text" className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="ルーム名" />
+              <input id="roomname" {...register("roomname", { required: true })} type="text" className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="ルーム名" />
               {errors.roomname && <span className="text-red-500 text-xs italic">必須項目です。</span>}
             </div>
             <div>

@@ -3,7 +3,7 @@ import logo from "./logo.svg";
 import "./App.css";
 import Welcome from "./Welcome";
 import Quiz from "./Quiz";
-import socketIOClient from "socket.io-client";
+// import socketIOClient from "socket.io-client";
 
 const URL = "ws://localhost:3000/ws/";
 const webSocket = new WebSocket(URL);
@@ -52,6 +52,9 @@ const App: React.FC<Props> = (props) => {
   const sendName = (name: string) => {
     webSocket.send("/name " + name);
   };
+  const setIsWelcomeFalse = () => {
+    setIsWelcome(false);
+  }
   const sendStart = () => {
     webSocket.send("/start");
   };
@@ -62,14 +65,9 @@ const App: React.FC<Props> = (props) => {
     webSocket.send("/answer " + answer);
   };
 
-  // ためしに
-  const onclick = () => {
-    setIsWelcome(false);
-  };
   return (
     <div>
-      {isWelcome ? <Welcome /> : <Quiz />}
-      <button onClick={onclick}>test</button>
+      {isWelcome ? <Welcome sendJoin={sendJoin} sendName={sendName} setIsWelcomeFalse={setIsWelcomeFalse} /> : <Quiz />}
     </div>
   );
 };
