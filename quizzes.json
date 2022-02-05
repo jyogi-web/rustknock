@@ -19,8 +19,8 @@
     "id": 3,
     "question": "船、飛行機、列車などの積み荷を表す英単語で、プログラミング言語Rustのビルドシステムの名称は何？",
     "answers": [
-      "cargo",
-      "Cargo"
+      "Cargo",
+      "cargo"
     ],
     "explanatory": "Cargoは、Rustのビルドシステム兼、パッケージマネージャです。"
   },
@@ -55,34 +55,40 @@
   },
   {
     "id": 7,
-    "question": "これは問題７です",
+    "question": "蟹の甲羅に含まれる成分として次のうち、正しいものはどれ？ 1.カチン 2.コチン 3.クチン 4.キチン",
     "answers": [
-      "7"
+      "キチン"
     ],
-    "explanatory": "ええええええええええええええ"
+    "explanatory": "簡単だよね"
   },
   {
     "id": 8,
-    "question": "これは問題８です",
+    "question": "2021年における蟹の漁獲量1位は北海道ですが、2位はどこ？",
     "answers": [
-      "8"
+      "鳥取県",
+      "鳥取",
+      "とっとり"
     ],
-    "explanatory": "ええええええええええええええ"
+    "explanatory": "へぇ"
   },
   {
     "id": 9,
-    "question": "これは問題９です",
+    "question": "錆 なんと読む？",
     "answers": [
-      "9"
+      "さび",
+      "サビ",
+      "Rust",
+      "rust"
     ],
-    "explanatory": "ええええええええええええええ"
+    "explanatory": "へぇ"
   },
   {
     "id": 10,
-    "question": "これは問題１０です",
+    "question": "「鉄」と「亜鉛」どちらが錆びやすい？",
     "answers": [
-      "10"
+      "亜鉛",
+      "あえん"
     ],
-    "explanatory": "ええええええええええええええ"
+    "explanatory": "ぴえん"
   }
 ]
