@@ -10,10 +10,11 @@ use actix_web::client;
 use getset::Getters;
 use log::{debug, info, warn};
 use quiz_json::Quiz;
+use serde::{Deserialize, Serialize};
 
 use crate::message::{
-    AnswerRequest, AnswerRightRequest, DelayNotification, DeleteUser, JoinRoom, LeaveRoom,
-    QuizStartRequest, StopDelayActor, StopQuizRoom, WsMessage,
+    AnswerRequest, AnswerRightRequest, DelayNotification, DeleteUser, EntryName, JoinRoom,
+    LeaveRoom, QuizStartRequest, StopDelayActor, StopQuizRoom, WsMessage,
 };
 
 const QUIZ_QUESTION_NUMBER: usize = 5;
@@ -27,6 +28,13 @@ pub(crate) struct User {
     name: String,
     score: usize,
     addr: Recipient<WsMessage>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct UserJson {
+    pub id: usize,
+    pub name: String,
+    pub score: usize,
 }
 
 impl User {
@@ -138,6 +146,20 @@ impl QuizRoom {
 
         graceful_stop.subscribe(delayer.recipient()).start();
     }
+
+    fn send_users_data_json(&mut self) {
+        let mut users = Vec::new();
+
+        for (id, user) in &self.users {
+            users.push(UserJson {
+                id: id.to_owned(),
+                name: user.name.to_owned(),
+                score: user.score,
+            });
+        }
+
+        self.broadcast_message(&serde_json::to_string(&users).unwrap());
+    }
 }
 
 impl Actor for QuizRoom {
@@ -177,9 +199,22 @@ impl Handler<JoinRoom> for QuizRoom {
 
         let user = User::new(&name.unwrap_or_else(|| "anonymous".to_string()), addr);
         debug!("Join id {} in {} room", &id, self.room_name);
-        self.users.insert(id, user);
+        self.add_user(id, user);
+        self.send_users_data_json();
 
         MessageResult(Ok((id, ctx.address())))
+    }
+}
+
+impl Handler<EntryName> for QuizRoom {
+    type Result = ();
+
+    fn handle(&mut self, msg: EntryName, _ctx: &mut Self::Context) -> Self::Result {
+        let EntryName { id, name } = msg;
+
+        if let Some(user) = self.users.get_mut(&id) {
+            user.name = name;
+        }
     }
 }
 
@@ -191,6 +226,7 @@ impl Handler<LeaveRoom> for QuizRoom {
 
         if let Some(_) = self.users.remove(&id) {
             info!("Leave {} room id: {}", &self.room_name, &id);
+            self.send_users_data_json();
             if self.state == QuizLifecycle::AnswerWaiting && self.during_answer_id == Some(id) {
                 self.state = QuizLifecycle::AnswerRightWaiting;
                 self.during_answer_id = None;
@@ -309,6 +345,7 @@ impl Handler<AnswerRequest> for QuizRoom {
 
     fn handle(&mut self, msg: AnswerRequest, ctx: &mut Self::Context) -> Self::Result {
         let AnswerRequest { id, answer } = msg;
+        let mut is_correct_answer = false;
 
         if self.state == QuizLifecycle::AnswerWaiting
             && self.during_answer_id.unwrap_or_default() == id
@@ -322,6 +359,7 @@ impl Handler<AnswerRequest> for QuizRoom {
             {
                 if let Some(user) = self.users.get_mut(&id) {
                     user.score += 1;
+                    is_correct_answer = true;
                     info!("正解 id:{} score:{} ans:{}", id, user.score, answer);
                 } else {
                     debug!("ここには入らないはず id {} users {:?}", id, self.users);
@@ -344,6 +382,10 @@ impl Handler<AnswerRequest> for QuizRoom {
                     id,
                 );
             }
+        }
+
+        if is_correct_answer {
+            self.send_users_data_json();
         }
 
         MessageResult(Err("/incorrect".to_string()))

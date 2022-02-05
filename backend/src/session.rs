@@ -4,8 +4,8 @@ use log::{debug, info, warn};
 
 use crate::{
     message::{
-        AnswerRequest, AnswerRightRequest, GetRoom, JoinRoom, LeaveRoom, QuizStartRequest,
-        WsMessage,
+        AnswerRequest, AnswerRightRequest, EntryName, GetRoom, JoinRoom, LeaveRoom,
+        QuizStartRequest, WsMessage,
     },
     room::QuizRoom,
     server::WsQuizServer,
@@ -73,6 +73,19 @@ impl WsSession {
                 })
                 .wait(ctx);
         };
+    }
+
+    fn entry_name(&mut self, name: &str, _ctx: &mut ws::WebsocketContext<Self>) {
+        let name = name.to_string();
+
+        if let Some(addr) = self.room_addr.as_ref() {
+            addr.do_send(EntryName {
+                id: self.id,
+                name: name.clone(),
+            });
+        }
+
+        self.name = Some(name);
     }
 
     fn start_request(&mut self, _ctx: &mut ws::WebsocketContext<Self>) {
@@ -177,6 +190,11 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WsSession {
                                 self.join_room(room_name, ctx)
                             } else {
                                 ctx.text("!!! room name is required");
+                            }
+                        }
+                        Some("/name") => {
+                            if let Some(name) = command.next() {
+                                self.entry_name(name, ctx);
                             }
                         }
                         Some("/start") => self.start_request(ctx),
