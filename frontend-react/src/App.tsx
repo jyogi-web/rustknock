@@ -9,7 +9,16 @@ interface Props {}
 const App: React.FC<Props> = (props) => {
   const [isWelcome, setIsWelcome] = useState(true);
 
-  return <div>{isWelcome ? <Welcome /> : <Quiz />}</div>;
+  // ためしに
+  const onclick = () => {
+    setIsWelcome(false);
+  };
+  return (
+    <div>
+      {isWelcome ? <Welcome /> : <Quiz />}
+      <button onClick={onclick}>test</button>
+    </div>
+  );
 };
 
 export default App;

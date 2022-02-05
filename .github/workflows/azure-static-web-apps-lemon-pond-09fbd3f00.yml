@@ -5,14 +5,16 @@ on:
     branches:
       - main
     paths:
-      - 'frontend-react/**'
+      - "frontend-react/**"
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
       - main
     paths:
-      - 'frontend-react/**'
+      - "frontend-react/**"
   workflow_dispatch:
+env:
+  CI: false
 
 jobs:
   build:
@@ -39,12 +41,12 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v2
         with:
-          node-version: '16.x'
+          node-version: "16.x"
           cache: yarn
-          cache-dependency-path: 'frontend-react/yarn.lock'
+          cache-dependency-path: "frontend-react/yarn.lock"
 
       - name: yarn install
-#        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        #        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: |
           yarn install --prefer-offline
         working-directory: ./frontend-react
