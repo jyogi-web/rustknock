@@ -1,11 +1,11 @@
-use rustknock_frontend::hello::Hello;
+use rustknock_frontend::welcome::Welcome;
 use yew::prelude::*;
 
 #[function_component(App)]
 pub fn app() -> Html {
     html!(
         <div>
-            <Hello />
+            <Welcome />
         </div>
     )
 }
