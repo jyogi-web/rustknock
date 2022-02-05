@@ -1,26 +1,24 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import logo from "./logo.svg";
+import "./App.css";
+import Welcome from "./Welcome";
+import Quiz from "./Quiz";
 
-function App() {
+interface Props {}
+
+const App: React.FC<Props> = (props) => {
+  const [isWelcome, setIsWelcome] = useState(true);
+
+  // ためしに
+  const onclick = () => {
+    setIsWelcome(false);
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      {isWelcome ? <Welcome /> : <Quiz />}
+      <button onClick={onclick}>test</button>
     </div>
   );
-}
+};
 
 export default App;
