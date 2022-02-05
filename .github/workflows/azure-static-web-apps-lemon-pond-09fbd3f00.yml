@@ -23,6 +23,10 @@ jobs:
       - name: Checkout 🛎
         uses: actions/checkout@v2
 
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
       - name: Cache Node Modules 📦
         uses: actions/cache@v2
         id: yarn-cache
@@ -39,9 +43,9 @@ jobs:
           cache: yarn
 
       - name: npm install, build, and test
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
+#        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: |
-          yarn install --frozen-lockfile
+          yarn install --prefer-offline
 
       - name: build
         run: |
