@@ -12,7 +12,7 @@ use quiz_json::Quiz;
 
 use crate::message::{
     AnswerRequest, AnswerRightRequest, DelayNotification, DeleteUser, JoinRoom, LeaveRoom,
-    QuizStartRequest, WsMessage,
+    QuizStartRequest, StopDelayActor, WsMessage,
 };
 
 const QUIZ_QUESTION_NUMBER: usize = 5;
@@ -122,6 +122,10 @@ impl QuizRoom {
     }
 
     fn delay_notification(&mut self, ms: u64, ctx: &mut Context<Self>) {
+        if let Some(addr) = self.delay_actor_addr.as_ref() {
+            addr.do_send(StopDelayActor);
+        }
+
         let graceful_stop = GracefulStop::new();
         let delay_actor = DelayActor::new(ctx.address(), ms).start();
         let delayer = Delayer::new(
@@ -244,21 +248,31 @@ impl Handler<DelayNotification> for QuizRoom {
         match self.state {
             QuizLifecycle::Ready => (),
             QuizLifecycle::Started => {
-                self.current_quiz_number += 1;
-                let question = self.quizzes.pop().unwrap_or_default();
-
-                self.broadcast_message(&format!(
-                    "/question {} {}",
-                    QUIZ_LIMIT_TIME_MS,
-                    question.question()
-                ));
-                self.current_quiz = Some(question);
-                self.state = QuizLifecycle::AnswerRightWaiting;
-                self.delay_notification(QUIZ_LIMIT_TIME_MS, ctx);
+                if let Some(question) = self.quizzes.pop() {
+                    self.current_quiz_number += 1;
+                    info!("{}問目配信", self.current_quiz_number);
+                    self.broadcast_message(&format!(
+                        "/question {} {}",
+                        QUIZ_LIMIT_TIME_MS,
+                        question.question()
+                    ));
+                    self.current_quiz = Some(question);
+                    self.state = QuizLifecycle::AnswerRightWaiting;
+                    self.delay_notification(QUIZ_LIMIT_TIME_MS, ctx);
+                } else {
+                    info!("結果発表にいくよ");
+                    self.state = QuizLifecycle::Ready;
+                }
             }
-            QuizLifecycle::AnswerRightWaiting => {}
+            QuizLifecycle::AnswerRightWaiting => {
+                info!("時間切れ");
+                self.state = QuizLifecycle::Started;
+            }
             QuizLifecycle::AnswerWaiting => {}
-            QuizLifecycle::Result => {}
+            QuizLifecycle::Result => {
+                info!("けっかはっぴょぉおおおおおおおおおおおおお");
+                self.broadcast_message("/result");
+            }
             _ => (),
         }
     }
@@ -390,5 +404,14 @@ impl Handler<Task> for DelayActor {
             debug!("Send delay notification");
             ctx.stop();
         }
+    }
+}
+
+impl Handler<StopDelayActor> for DelayActor {
+    type Result = ();
+
+    fn handle(&mut self, _msg: StopDelayActor, ctx: &mut Self::Context) -> Self::Result {
+        info!("Stop DelayActor");
+        ctx.stop();
     }
 }

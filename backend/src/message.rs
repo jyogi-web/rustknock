@@ -47,3 +47,7 @@ pub(crate) struct AnswerRequest {
     pub id: usize,
     pub answer: String,
 }
+
+#[derive(Clone, Message)]
+#[rtype(result = "()")]
+pub(crate) struct StopDelayActor;
