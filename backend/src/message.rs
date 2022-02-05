@@ -57,3 +57,10 @@ pub(crate) struct StopDelayActor;
 pub(crate) struct StopQuizRoom {
     pub room_name: String,
 }
+
+#[derive(Clone, Message)]
+#[rtype(result = "()")]
+pub(crate) struct EntryName {
+    pub id: usize,
+    pub name: String,
+}
