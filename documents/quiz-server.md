@@ -64,6 +64,7 @@ stateDiagram
 | /ans_lock                       | なし   | 解答権をロックする         |                            |
 | /ans_unlock                     | なし   | 解答権をアンロックする     |                            |
 | /timeup                     | なし   | 時間切れを通知     |                            |
+| /question_answer                     | なし   | 解答配信     |                            |
 | /others_correct_answer {id} {answer}                    | なし   | 他ユーザの正解解答を通知する     |                            |
 | /others_incorrect_answer {id} {answer}                    | なし   | 他ユーザの誤答解答を通知する     |                            |
 | /users {user_json}              | なし   | ユーザ情報を配信         | 定期的に配信．型定義は以下 |
