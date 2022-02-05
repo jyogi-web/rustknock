@@ -20,7 +20,7 @@ use crate::message::{
 const QUIZ_QUESTION_NUMBER: usize = 5;
 const SELECT_QUIZZES_ENDPOINT: &'static str = "http://localhost:3000/quiz/";
 const DELAY_START_MS: u64 = 5000;
-const QUIZ_LIMIT_TIME_MS: u64 = 6000;
+const QUIZ_LIMIT_TIME_MS: u64 = 60000;
 const INTERVAL_OF_QUIZ_MS: u64 = 5000;
 
 #[derive(Getters, Debug, Clone)]
@@ -306,6 +306,16 @@ impl Handler<DelayNotification> for QuizRoom {
                 info!("時間切れ");
                 self.state = QuizLifecycle::Started;
                 self.broadcast_message("/timeup");
+                let (correct, explanatory) = if let Some(quiz) = self.current_quiz.as_ref() {
+                    (
+                        format!("/question_answer {}", quiz.answers()[0]),
+                        format!("/explanatory {}", quiz.explanatory()),
+                    )
+                } else {
+                    (String::new(), String::new())
+                };
+                self.broadcast_message(&correct);
+                self.broadcast_message(&explanatory);
                 self.delay_notification(INTERVAL_OF_QUIZ_MS, ctx);
             }
             QuizLifecycle::Result => {
@@ -371,6 +381,12 @@ impl Handler<AnswerRequest> for QuizRoom {
                     id,
                 );
                 self.broadcast_message_with_filter("/ans_unlock", id);
+                let explanatory = if let Some(quiz) = self.current_quiz.as_ref() {
+                    format!("/explanatory {}", quiz.explanatory())
+                } else {
+                    String::new()
+                };
+                self.broadcast_message(&explanatory);
                 self.delay_notification(INTERVAL_OF_QUIZ_MS, ctx);
                 return MessageResult(Ok(()));
             } else {
