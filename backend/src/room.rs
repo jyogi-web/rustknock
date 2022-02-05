@@ -1,6 +1,7 @@
 use std::{collections::HashMap, ops::RangeBounds, sync::Arc, time::Duration};
 
 use actix::prelude::*;
+use actix_broker::BrokerIssue;
 use actix_daemon_utils::{
     delayer::{Delayer, Task, Timing},
     graceful_stop::GracefulStop,
@@ -12,7 +13,7 @@ use quiz_json::Quiz;
 
 use crate::message::{
     AnswerRequest, AnswerRightRequest, DelayNotification, DeleteUser, JoinRoom, LeaveRoom,
-    QuizStartRequest, StopDelayActor, WsMessage,
+    QuizStartRequest, StopDelayActor, StopQuizRoom, WsMessage,
 };
 
 const QUIZ_QUESTION_NUMBER: usize = 5;
@@ -268,11 +269,18 @@ impl Handler<DelayNotification> for QuizRoom {
             QuizLifecycle::AnswerRightWaiting | QuizLifecycle::AnswerWaiting => {
                 info!("時間切れ");
                 self.state = QuizLifecycle::Started;
+                self.broadcast_message("/timeup");
                 self.delay_notification(INTERVAL_OF_QUIZ_MS, ctx);
             }
             QuizLifecycle::Result => {
                 info!("けっかはっぴょぉおおおおおおおおおおおおお");
                 self.broadcast_message("/result");
+
+                info!("Stop QuizRoom");
+                self.issue_system_async(StopQuizRoom {
+                    room_name: self.room_name.to_owned(),
+                });
+                ctx.stop();
             }
             _ => (),
         }

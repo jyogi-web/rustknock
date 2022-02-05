@@ -59,9 +59,10 @@ stateDiagram
 | コード                          | 戻り値 | 実行結果                   | 補足                       |
 | :------------------------------ | :----- | :------------------------- | -------------------------- |
 | /quiz_started                   | なし   | クイズセクション開始を合図 | ルーム加入者全員に送られる |
-| /question {limit_time} {問題文} | なし   |                            |                            |
+| /question {limit_time_ms} {問題文} | なし   |                            |                            |
 | /ans_lock                       | なし   | 解答権をロックする         |                            |
 | /ans_unlock                     | なし   | 解答権をアンロックする     |                            |
+| /timeup                     | なし   | 時間切れを通知     |                            |
 | /others_correct_answer {id} {answer}                    | なし   | 他ユーザの正解解答を通知する     |                            |
 | /others_incorrect_answer {id} {answer}                    | なし   | 他ユーザの誤答解答を通知する     |                            |
 | /users {user_json}              | なし   | ユーザ情報を配信         | 定期的に配信．型定義は以下 |

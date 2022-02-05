@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 
 use actix::prelude::*;
-use log::info;
+use actix_broker::BrokerSubscribe;
+use log::{debug, info};
 
 use crate::{
-    message::{GetRoom, JoinRoom},
+    message::{GetRoom, JoinRoom, StopQuizRoom},
     room::{self, QuizRoom, User},
 };
 
@@ -20,6 +21,7 @@ impl Actor for WsQuizServer {
 
     fn started(&mut self, ctx: &mut Self::Context) {
         info!("WsQuizServer started");
+        self.subscribe_system_async::<StopQuizRoom>(ctx);
     }
 }
 
@@ -66,6 +68,18 @@ impl Handler<GetRoom> for WsQuizServer {
         self.rooms.insert(room_name, room_addr.clone());
 
         MessageResult(room_addr)
+    }
+}
+
+impl Handler<StopQuizRoom> for WsQuizServer {
+    type Result = ();
+
+    fn handle(&mut self, msg: StopQuizRoom, _ctx: &mut Self::Context) -> Self::Result {
+        let StopQuizRoom { room_name } = msg;
+
+        if let Some(_) = self.rooms.remove(&room_name) {
+            debug!("Stop 通知受け取りました");
+        };
     }
 }
 

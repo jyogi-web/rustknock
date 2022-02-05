@@ -51,3 +51,9 @@ pub(crate) struct AnswerRequest {
 #[derive(Clone, Message)]
 #[rtype(result = "()")]
 pub(crate) struct StopDelayActor;
+
+#[derive(Clone, Message)]
+#[rtype(result = "()")]
+pub(crate) struct StopQuizRoom {
+    pub room_name: String,
+}
