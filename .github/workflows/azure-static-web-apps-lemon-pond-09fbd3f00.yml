@@ -58,7 +58,7 @@ jobs:
         with:
           name: webapp_artifact
           path: |
-            frontend/build
+            frontend-react/build
 
       - name: Notify result to slack
         uses: homoluctus/slatify@master
