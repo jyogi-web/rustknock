@@ -8,7 +8,7 @@ use {futures::prelude::*, log::*, wasm_bindgen::prelude::*, ws_stream_wasm::*};
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{EventTarget, HtmlInputElement};
 
-const URL: &str = "ws://127.0.0.1:3000/ws/";
+const URL: &str = "wss://rustknock-server.azurewebsites.net/ws/";
 
 async fn join_room(roomname: String, username: String) {
     // info!はwasm-loggerのマクロだよ！
@@ -82,7 +82,7 @@ pub fn welcome() -> Html {
                     </div>
 
                     <div>
-                      <button type="submit" {onclick} class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                      <button type="button" {onclick} class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                           {"ルームに入る"}
                       </button>
                     </div>
