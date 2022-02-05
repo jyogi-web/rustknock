@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{collections::HashMap, ops::RangeBounds, sync::Arc, time::Duration};
 
 use actix::prelude::*;
 use actix_daemon_utils::{
@@ -16,7 +16,7 @@ use crate::message::{
 };
 
 const QUIZ_QUESTION_NUMBER: usize = 5;
-const SELECT_QUIZZES_ENDPOINT: &'static str = "localhost:3000/quiz/";
+const SELECT_QUIZZES_ENDPOINT: &'static str = "http://localhost:3000/quiz/";
 const DELAY_START_MS: u64 = 5000;
 const QUIZ_LIMIT_TIME_MS: u64 = 6000;
 const INTERVAL_OF_QUIZ_MS: u64 = 5000;
@@ -68,6 +68,7 @@ pub(crate) struct QuizRoom {
     current_quiz_number: u32,
     current_quiz: Option<Quiz>,
     during_answer_id: Option<usize>,
+    delay_actor_addr: Option<Addr<DelayActor>>,
 }
 
 impl QuizRoom {
@@ -109,6 +110,7 @@ impl QuizRoom {
             // WARN バグの暫定対応
             if id == filter_id {
                 self.add_user(id, user);
+                continue;
             }
 
             if id != filter_id && user.addr.do_send(WsMessage(msg.to_string())).is_ok() {
@@ -200,7 +202,7 @@ impl Handler<QuizStartRequest> for QuizRoom {
             // 問題をリクエスト
             // NOTE ローカルで実装しているAPIから取得しているがここだけ外部に移行してもいいかも
             let res = reqwest::blocking::get(format!(
-                "http://{}{}",
+                "{}{}",
                 SELECT_QUIZZES_ENDPOINT, QUIZ_QUESTION_NUMBER
             ));
             if let Ok(res) = res {
@@ -288,7 +290,13 @@ impl Handler<AnswerRequest> for QuizRoom {
         if self.state == QuizLifecycle::AnswerWaiting
             && self.during_answer_id.unwrap_or_default() == id
         {
-            if self.current_quiz.as_ref().unwrap().answer() == &answer {
+            if self
+                .current_quiz
+                .as_ref()
+                .unwrap()
+                .answers()
+                .contains(&answer)
+            {
                 if let Some(user) = self.users.get_mut(&id) {
                     user.score += 1;
                     info!("正解 id:{} score:{} ans:{}", id, user.score, answer);

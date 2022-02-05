@@ -2,61 +2,81 @@
   {
     "id": 1,
     "question": "Cを開発したBjarne Stroustrupは、「Cでは簡単に自分の足を撃てる。Cで自分の足を撃つのはむずかしいが、撃ったら○○○○○○○○。」この○に当てはまる言葉を答えよ。",
-    "answer": "足全体が吹き飛ぶ",
+    "answers": [
+      "足全体が吹き飛ぶ"
+    ],
     "explanatory": "Rustでは足に向けると引き金が引けないようになっています"
   },
   {
     "id": 2,
     "question": "これは問題２です",
-    "answer": "2",
+    "answers": [
+      "2"
+    ],
     "explanatory": "ええええええええええええええ"
   },
   {
     "id": 3,
     "question": "これは問題３です",
-    "answer": "3",
+    "answers": [
+      "3"
+    ],
     "explanatory": "ええええええええええええええ"
   },
   {
     "id": 4,
     "question": "これは問題４です",
-    "answer": "4",
+    "answers": [
+      "4"
+    ],
     "explanatory": "ええええええええええええええ"
   },
   {
     "id": 5,
     "question": "これは問題５です",
-    "answer": "5",
+    "answers": [
+      "5"
+    ],
     "explanatory": "ええええええええええええええ"
   },
   {
     "id": 6,
     "question": "これは問題６です",
-    "answer": "6",
+    "answers": [
+      "6"
+    ],
     "explanatory": "ええええええええええええええ"
   },
   {
     "id": 7,
     "question": "これは問題７です",
-    "answer": "7",
+    "answers": [
+      "7"
+    ],
     "explanatory": "ええええええええええええええ"
   },
   {
     "id": 8,
     "question": "これは問題８です",
-    "answer": "8",
+    "answers": [
+      "8"
+    ],
     "explanatory": "ええええええええええええええ"
   },
   {
     "id": 9,
     "question": "これは問題９です",
-    "answer": "9",
+    "answers": [
+      "9"
+    ],
     "explanatory": "ええええええええええええええ"
   },
   {
     "id": 10,
     "question": "これは問題１０です",
-    "answer": "10",
+    "answers": [
+      "10"
+    ],
     "explanatory": "ええええええええええええええ"
   }
 ]
