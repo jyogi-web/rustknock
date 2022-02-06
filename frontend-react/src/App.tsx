@@ -85,6 +85,7 @@ const App: React.FC<Props> = (props) => {
 
         setAnswerResult(true);
         setOthersAnswer(answer);
+        console.log(answer);
       } else if (data.data.startsWith("/others_incorrect_answer")) {
         const split: string = data.data.split(" ");
         const id = Number.parseInt(split[1]);
@@ -92,6 +93,7 @@ const App: React.FC<Props> = (props) => {
 
         setAnswerResult(false);
         setOthersAnswer(answer);
+        console.log(answer);
       } else if (data.data.startsWith("/users")) {
         const userData: string = data.data;
         const userJson = userData.split(" ", 2)[1];

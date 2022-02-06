@@ -48,6 +48,7 @@ const Quiz: React.FC<Props> = (props) => {
   const sendMyAnswer = () => {
     props.sendAnswer(myAnswer);
   };
+  console.log(props.userData);
 
   return (
     <div className="quiz">
