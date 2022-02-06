@@ -218,6 +218,7 @@ impl Handler<EntryName> for QuizRoom {
         if let Some(user) = self.users.get_mut(&id) {
             info!("Entry id {} user_name {}", &id, &name);
             user.name = name;
+            self.send_users_data_json();
         }
     }
 }
