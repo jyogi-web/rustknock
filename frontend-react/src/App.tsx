@@ -26,6 +26,7 @@ interface Props {}
 const App: React.FC<Props> = (props) => {
   const [isWelcome, setIsWelcome] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState("");
+  const [isAnswerRight, setIsAnswerRight] = useState(false);
   const [isAnswerLock, setIsAnswerLock] = useState(false);
   // TODO timeup
   const [currentQuestionAnswer, setCurrentQuestionAnswer] = useState("");
@@ -75,10 +76,14 @@ const App: React.FC<Props> = (props) => {
         const split: string = data.data.split(" ");
         const id = Number.parseInt(split[1]);
         const answer = split[2];
+
+        setOthersAnswer(answer);
       } else if (data.data.startsWith("/others_incorrect_answer")) {
         const split: string = data.data.split(" ");
         const id = Number.parseInt(split[1]);
         const answer = split[2];
+
+        setOthersAnswer(answer);
       } else if (data.data.startsWith("/users")) {
         const userData: string = data.data;
         const userJson = userData.split(" ", 2)[1];
@@ -91,7 +96,9 @@ const App: React.FC<Props> = (props) => {
       } else if (data.data.startsWith("/name_err")) {
       } else if (data.data.startsWith("/quiz_started")) {
       } else if (data.data.startsWith("/ans_ok")) {
+        setIsAnswerRight(true);
       } else if (data.data.startsWith("/ans_err")) {
+        setIsAnswerRight(false);
       } else if (data.data.startsWith("/correct")) {
       } else if (data.data.startsWith("/incorrect")) {
       }
@@ -123,6 +130,7 @@ const App: React.FC<Props> = (props) => {
   };
   const sendAnswer = (answer: string) => {
     webSocket.send("/answer " + answer);
+    setIsAnswerRight(false);
   };
 
   return (

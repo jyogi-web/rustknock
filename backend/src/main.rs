@@ -88,7 +88,7 @@ async fn main() -> std::io::Result<()> {
             .service(Files::new("/static", "./backend/static/").index_file("index.html"))
             .service(web::resource("/ws/").to(ws_route))
     })
-    .bind(("0.0.0.0", 80))?
+    .bind(("0.0.0.0", 3000))?
     .run()
     .await
 }

@@ -21,4 +21,5 @@ RUN cargo build --release -p rustknock-backend
 RUN mv ./target/release/rustknock-backend /usr/local/bin
 # 外部ファイルとして読み込む系は以下で
 COPY ./quizzes.json ./quizzes.json
+EXPOSE 3000
 CMD ["rustknock-backend"]

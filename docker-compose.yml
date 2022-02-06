@@ -9,7 +9,7 @@ services:
     environment:
       - RUST_BACKTRACE=1
     ports:
-      - "80:80"
+      - "3000:3000"
     volumes:
       - .:/app
       - cargo-cache:/usr/local/cargo/registry
