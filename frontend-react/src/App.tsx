@@ -31,6 +31,9 @@ const App: React.FC<Props> = (props) => {
   const [currentQuestionAnswer, setCurrentQuestionAnswer] = useState("");
   const [currentQuestionExplanatory, setCurrentQuestionExplanatory] =
     useState("");
+  const [isTimeUp, setIsTimeUp] = useState(false);
+  const [othersAnswer, setOthersAnswer] = useState("");
+
   // TODO others_correct_answer
   // TODO others_incorrect_answer
 
@@ -47,11 +50,27 @@ const App: React.FC<Props> = (props) => {
         const split: string = data.data.split(" ");
         const timeLimitMs = Number.parseInt(split[1]);
         const question = split[2];
+        setCurrentQuestion(question);
+        setCurrentQuestionAnswer("");
+        setCurrentQuestionExplanatory("");
+
+        setIsTimeUp(false);
       } else if (data.data.startsWith("/ans_lock")) {
+        setIsAnswerLock(true);
       } else if (data.data.startsWith("/ans_unlock")) {
+        setIsAnswerLock(false);
       } else if (data.data.startsWith("/timeup")) {
+        setIsTimeUp(true);
       } else if (data.data.startsWith("/question_answer")) {
+        const split: string = data.data.split(" ");
+        const answer = split[1];
+
+        setCurrentQuestionAnswer(answer);
       } else if (data.data.startsWith("/explanatory")) {
+        const split: string = data.data.split(" ");
+        const explanatory = split[1];
+
+        setCurrentQuestionExplanatory(explanatory);
       } else if (data.data.startsWith("/others_correct_answer")) {
         const split: string = data.data.split(" ");
         const id = Number.parseInt(split[1]);

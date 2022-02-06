@@ -76,7 +76,7 @@ async fn main() -> std::io::Result<()> {
             } else {
                 // リリース時
                 // 全許可
-    Cors::default()
+                Cors::default()
                     .allow_any_origin()
                     .send_wildcard()
                     .max_age(3600)
@@ -88,7 +88,7 @@ async fn main() -> std::io::Result<()> {
             .service(Files::new("/static", "./backend/static/").index_file("index.html"))
             .service(web::resource("/ws/").to(ws_route))
     })
-    .bind(("0.0.0.0", 3000))?
+    .bind(("0.0.0.0", 80))?
     .run()
     .await
 }
