@@ -158,7 +158,10 @@ impl QuizRoom {
             });
         }
 
-        self.broadcast_message(&serde_json::to_string(&users).unwrap());
+        self.broadcast_message(&format!(
+            "/users {}",
+            &serde_json::to_string(&users).unwrap()
+        ));
     }
 }
 
