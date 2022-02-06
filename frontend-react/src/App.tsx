@@ -11,13 +11,13 @@ const URL = "wss://rustknock-server.azurewebsites.net/ws/";
 // const URL = "ws://localhost:3000/ws/";
 const webSocket = new WebSocket(URL);
 
-type User = {
+export type User = {
   id: number;
   name: string;
   score: number;
 };
 
-type Users = {
+export type Users = {
   userdata: User[];
 };
 
@@ -35,6 +35,9 @@ const App: React.FC<Props> = (props) => {
   const [isTimeUp, setIsTimeUp] = useState(false);
   const [othersAnswer, setOthersAnswer] = useState("");
   const [userData, setUserData] = useState(JSON.parse("[]") as Users);
+  const [isStarted, setIsStarted] = useState(false);
+  const [answerResult, setAnswerResult] = useState(true);
+  const [isMyAnswer, setIsMyAnswer] = useState("");
 
   // TODO others_correct_answer
   // TODO others_incorrect_answer
@@ -48,13 +51,15 @@ const App: React.FC<Props> = (props) => {
       const msg: string = data.data;
 
       if (data.data.startsWith("/quiz_started")) {
+        setIsStarted(true);
       } else if (data.data.startsWith("/question")) {
-        const split: string = data.data.split(" ");
+        const split: string = data.data.split(" ", 3);
         const timeLimitMs = Number.parseInt(split[1]);
         const question = split[2];
         setCurrentQuestion(question);
         setCurrentQuestionAnswer("");
         setCurrentQuestionExplanatory("");
+        setAnswerResult(false);
 
         setIsTimeUp(false);
       } else if (data.data.startsWith("/ans_lock")) {
@@ -78,12 +83,14 @@ const App: React.FC<Props> = (props) => {
         const id = Number.parseInt(split[1]);
         const answer = split[2];
 
+        setAnswerResult(true);
         setOthersAnswer(answer);
       } else if (data.data.startsWith("/others_incorrect_answer")) {
         const split: string = data.data.split(" ");
         const id = Number.parseInt(split[1]);
         const answer = split[2];
 
+        setAnswerResult(false);
         setOthersAnswer(answer);
       } else if (data.data.startsWith("/users")) {
         const userData: string = data.data;
@@ -105,7 +112,9 @@ const App: React.FC<Props> = (props) => {
       } else if (data.data.startsWith("/ans_err")) {
         setIsAnswerRight(false);
       } else if (data.data.startsWith("/correct")) {
+        setAnswerResult(true);
       } else if (data.data.startsWith("/incorrect")) {
+        setAnswerResult(false);
       }
     };
 
@@ -147,7 +156,18 @@ const App: React.FC<Props> = (props) => {
           setIsWelcomeFalse={setIsWelcomeFalse}
         />
       ) : (
-        <Quiz />
+        <Quiz
+          sendStart={sendStart}
+          userData={userData}
+          isStarted={isStarted}
+          currentQuestion={currentQuestion}
+          currentQuestionAnswer={currentQuestionAnswer}
+          answerResult={answerResult}
+          othersAnswer={othersAnswer}
+          sendAnsReq={sendAnsReq}
+          isAnswerRight={isAnswerRight}
+          sendAnswer={sendAnswer}
+        />
       )}
     </div>
   );
