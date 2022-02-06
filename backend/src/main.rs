@@ -73,11 +73,10 @@ async fn main() -> std::io::Result<()> {
                 Cors::permissive()
             } else {
                 // リリース時
-                // Cors::default()
-                //     .allowed_origin("All")
-                //     .send_wildcard()
-                //     .max_age(3600)
-                Cors::permissive()
+                Cors::default()
+                    .allow_any_origin()
+                    .send_wildcard()
+                    .max_age(3600)
             })
             .wrap(Logger::default())
             .service(web::resource("/").to(index))
