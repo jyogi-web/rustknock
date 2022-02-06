@@ -34,6 +34,7 @@ const App: React.FC<Props> = (props) => {
     useState("");
   const [isTimeUp, setIsTimeUp] = useState(false);
   const [othersAnswer, setOthersAnswer] = useState("");
+  const [userData, setUserData] = useState(JSON.parse("[]") as Users);
 
   // TODO others_correct_answer
   // TODO others_incorrect_answer
@@ -88,10 +89,14 @@ const App: React.FC<Props> = (props) => {
         const userData: string = data.data;
         const userJson = userData.split(" ", 2)[1];
 
-        console.log(JSON.parse(userJson) as Users);
+        const json = JSON.parse(userJson) as Users;
+        console.log(json);
+        setUserData(json);
       } else if (data.data.startsWith == "/join_ok") {
         console.log("OKKKKKK");
+        setIsWelcome(false);
       } else if (data.data.startsWith("/join_err")) {
+        setIsWelcome(true);
       } else if (data.data.startsWith("/name_ok")) {
       } else if (data.data.startsWith("/name_err")) {
       } else if (data.data.startsWith("/quiz_started")) {
