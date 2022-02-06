@@ -136,6 +136,7 @@ const Quiz: React.FC<Props> = (props) => {
         <button
           onClick={sendMyAnswer}
           className="answer-submit-button rounded-lg border-2 border-sky-700 p-2 bg-sky-500 text-white"
+          type="button"
         >
           送信
         </button>
