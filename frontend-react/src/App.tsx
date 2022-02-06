@@ -7,7 +7,8 @@ import { stringify } from "querystring";
 import { type } from "os";
 // import socketIOClient from "socket.io-client";
 
-const URL = "ws://localhost:3000/ws/";
+const URL = "wss://rustknock-server.azurewebsites.net/ws/";
+// const URL = "ws://localhost:3000/ws/";
 const webSocket = new WebSocket(URL);
 
 type User = {
@@ -79,6 +80,10 @@ const App: React.FC<Props> = (props) => {
 
     webSocket.onclose = (e) => {
       console.log("WebSocket Closed");
+    };
+
+    webSocket.onerror = (e) => {
+      console.log("ws Err");
     };
   }, []);
 
