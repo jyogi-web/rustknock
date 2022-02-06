@@ -137,7 +137,7 @@ impl Actor for WsSession {
 
     fn started(&mut self, ctx: &mut Self::Context) {
         info!("WsSession connected");
-        self.join_room("debug", ctx);
+        // self.join_room("debug", ctx);
     }
 
     fn stopped(&mut self, ctx: &mut Self::Context) {
