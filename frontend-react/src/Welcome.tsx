@@ -18,7 +18,7 @@ const Welcome: React.FC<Props> = (props) => {
 
   return (
     // Special thanks https://tailwindui.com/preview#component-55b9c2097342175b8ddfccf8a30fb68f
-    <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-full flex items-center justify-center py-40 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-6xl font-extrabold text-gray-900">{"RustKnock"}</h2>
