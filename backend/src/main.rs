@@ -66,7 +66,7 @@ async fn main() -> std::io::Result<()> {
 
     std::env::set_var("RUST_LOG", "actix_web=info");
 
-    info!("HttpServer start");
+    // info!("HttpServer start");
 
     HttpServer::new(|| {
         App::new()
@@ -76,7 +76,7 @@ async fn main() -> std::io::Result<()> {
             } else {
                 // リリース時
                 // 全許可
-                Cors::default()
+    Cors::default()
                     .allow_any_origin()
                     .send_wildcard()
                     .max_age(3600)
