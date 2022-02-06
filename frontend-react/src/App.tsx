@@ -12,6 +12,8 @@ interface Props {}
 
 const App: React.FC<Props> = (props) => {
   const [isWelcome, setIsWelcome] = useState(true);
+  const [currentQuestion, setCurrentQuestion] = useState("");
+  const [isAnswerLock, setIsAnswerLock] = useState(false);
 
   useEffect(() => {
     webSocket.onopen = () => {
@@ -54,7 +56,7 @@ const App: React.FC<Props> = (props) => {
   };
   const setIsWelcomeFalse = () => {
     setIsWelcome(false);
-  }
+  };
   const sendStart = () => {
     webSocket.send("/start");
   };
@@ -67,7 +69,15 @@ const App: React.FC<Props> = (props) => {
 
   return (
     <div>
-      {isWelcome ? <Welcome sendJoin={sendJoin} sendName={sendName} setIsWelcomeFalse={setIsWelcomeFalse} /> : <Quiz />}
+      {isWelcome ? (
+        <Welcome
+          sendJoin={sendJoin}
+          sendName={sendName}
+          setIsWelcomeFalse={setIsWelcomeFalse}
+        />
+      ) : (
+        <Quiz />
+      )}
     </div>
   );
 };
