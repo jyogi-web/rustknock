@@ -66,6 +66,8 @@ async fn main() -> std::io::Result<()> {
 
     std::env::set_var("RUST_LOG", "actix_web=info");
 
+    info!("HttpServer start");
+
     HttpServer::new(|| {
         App::new()
             .wrap(if cfg!(debug_assertions) {
@@ -73,6 +75,7 @@ async fn main() -> std::io::Result<()> {
                 Cors::permissive()
             } else {
                 // リリース時
+                // 全許可
                 Cors::default()
                     .allow_any_origin()
                     .send_wildcard()
