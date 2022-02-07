@@ -8,7 +8,7 @@ on:
       - 'frontend/**'
       - 'Trunk.toml'
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, closed]
     branches:
       - main
     paths:
