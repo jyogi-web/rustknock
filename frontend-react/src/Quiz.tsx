@@ -4,7 +4,7 @@ import { User, Users } from "./App";
 import ScoreBoardItem from "./ScoreBoardItem";
 interface Props {
   sendStart: () => void;
-  userData: Users;
+  userData: User[];
   isStarted: boolean;
   currentQuestion: string;
   currentQuestionAnswer: string;
@@ -21,20 +21,23 @@ interface ScoreData {
 }
 
 const Quiz: React.FC<Props> = (props) => {
-  const [scoreData, setScoreData] = useState<ScoreData[]>([]);
+  const [scoreData, setScoreData] = useState<User[]>([]);
 
   useEffect(() => {
-    const sampleData: ScoreData[] = [
+    const sampleData: User[] = [
       {
-        username: "nissie",
+        id: 0,
+        name: "nissie",
         score: 20,
       },
       {
-        username: "nissie",
+        id: 0,
+        name: "nissie",
         score: 20,
       },
       {
-        username: "nissie",
+        id: 0,
+        name: "nissie",
         score: 20,
       },
     ];
@@ -61,9 +64,9 @@ const Quiz: React.FC<Props> = (props) => {
           </div>
           <div className="scoreboard-content">
             <div className="scoreboard-list">
-              {props.userData.userdata &&
-                props.userData.userdata.map((item: User) => (
-                  <ScoreBoardItem username={item.name} score={item.score} />
+              {props.userData &&
+                props.userData.map((item: User) => (
+                  <ScoreBoardItem name={item.name} score={item.score} />
                 ))}
             </div>
           </div>
@@ -136,7 +139,7 @@ const Quiz: React.FC<Props> = (props) => {
         {/* 送信ボタン */}
         <button
           onClick={sendMyAnswer}
-          className="answer-submit-button rounded-lg border-2 border-sky-700 p-2 bg-sky-500 text-white"
+          className="answer-button rounded-lg border-2 border-sky-700 p-2 bg-sky-500 text-white"
           type="button"
         >
           送信
