@@ -8,81 +8,81 @@ on:
     branches:
       - main
     paths:
-      - 'backend/**'
-      - 'quiz_json/**'
-      - 'quizzes.json'
+      - "backend/**"
+      - "quiz_json/**"
+      - "quizzes.json"
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Cache Docker layers
-      uses: actions/cache@v2
-      with:
-        path: |
-          /tmp/.buildx-cache
-          ./backend/target
-        key: ${{ github.ref }}-${{ github.sha }}
-        restore-keys: |
-          ${{ github.ref }}-${{ github.sha }}
-          ${{ github.ref }}
-          refs/head/main
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: |
+            /tmp/.buildx-cache
+            ./backend/target
+          key: ${{ github.ref }}-${{ github.sha }}
+          restore-keys: |
+            ${{ github.ref }}-${{ github.sha }}
+            ${{ github.ref }}
+            refs/head/main
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-    - name: Log in to registry
-      uses: docker/login-action@v1
-      with:
-        registry: https://rustknockserver.azurecr.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_2258d6cd9dec46fdae6fc9c70de3ffaa }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_c067387b5f214c1d929e08ea6a91adc4 }}
+      - name: Log in to registry
+        uses: docker/login-action@v1
+        with:
+          registry: https://rustknockserver.azurecr.io/
+          username: ${{ secrets.AzureAppService_ContainerUsername_2258d6cd9dec46fdae6fc9c70de3ffaa }}
+          password: ${{ secrets.AzureAppService_ContainerPassword_c067387b5f214c1d929e08ea6a91adc4 }}
 
-    - name: Build and push container image to registry
-      uses: docker/build-push-action@v2
-      with:
-        push: true
-        tags: rustknockserver.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_2258d6cd9dec46fdae6fc9c70de3ffaa }}/rustknock-server:${{ github.sha }}
-        file: ./backend/Dockerfile
-        context: ./
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache
+      - name: Build and push container image to registry
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: rustknockserver.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_2258d6cd9dec46fdae6fc9c70de3ffaa }}/rustknock-server:${{ github.sha }}
+          file: ./backend/Dockerfile
+          context: ./
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
 
-    - name: Notify result to slack
-      uses: homoluctus/slatify@master
-      if: always()
-      with:
-        type: ${{ job.status }}
-        job_name: "*Build RustKnock's Backend*"
-      env:
-        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Notify result to slack
+        uses: homoluctus/slatify@master
+        if: always()
+        with:
+          type: ${{ job.status }}
+          job_name: "*Build RustKnock's Backend*"
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: 'production'
+      name: "production"
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-    - name: Deploy to Azure Web App
-      id: deploy-to-webapp
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'rustknock-server'
-        slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_0024d1aaf6ae40e8b42c1f0c79d890da }}
-        images: 'rustknockserver.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_2258d6cd9dec46fdae6fc9c70de3ffaa }}/rustknock-server:${{ github.sha }}'
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: "rustknock-server"
+          slot-name: "production"
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_0024d1aaf6ae40e8b42c1f0c79d890da }}
+          images: "rustknockserver.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_2258d6cd9dec46fdae6fc9c70de3ffaa }}/rustknock-server:${{ github.sha }}"
 
-    - name: Notify result to slack
-      uses: homoluctus/slatify@master
-      if: always()
-      with:
-        type: ${{ job.status }}
-        job_name: "*Deploy RustKnock's Backend to Azure App Service*"
-      env:
-        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Notify result to slack
+        uses: homoluctus/slatify@master
+        if: always()
+        with:
+          type: ${{ job.status }}
+          job_name: "*Deploy RustKnock's Backend to Azure App Service*"
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
