@@ -1,6 +1,5 @@
 import PropTypes from "prop-types";
 import { Children, useCallback, useEffect, useState } from "react";
-import Countdown from "react-countdown";
 import { User, Users } from "./App";
 import Question from "./Question";
 import ScoreBoardItem from "./ScoreBoardItem";

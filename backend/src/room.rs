@@ -325,6 +325,7 @@ impl Handler<DelayNotification> for QuizRoom {
             }
             QuizLifecycle::Result => {
                 info!("けっかはっぴょぉおおおおおおおおおおおおお");
+                self.send_users_data_json();
                 self.broadcast_message("/result");
 
                 info!("Stop QuizRoom");
