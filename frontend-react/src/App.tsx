@@ -5,10 +5,12 @@ import Welcome from "./Welcome";
 import Quiz from "./Quiz";
 import { stringify } from "querystring";
 import { type } from "os";
+import Countdown from "react-countdown";
+import useCountDown from "react-countdown-hook";
 // import socketIOClient from "socket.io-client";
 
-const URL = "wss://rustknock-server.azurewebsites.net/ws/";
-// const URL = "ws://localhost:3000/ws/";
+// const URL = "wss://rustknock-server.azurewebsites.net/ws/";
+const URL = "ws://localhost:3000/ws/";
 const webSocket = new WebSocket(URL);
 
 export type User = {
@@ -38,8 +40,11 @@ const App: React.FC<Props> = (props) => {
     (JSON.parse("[]") as Users).userdata
   );
   const [isStarted, setIsStarted] = useState(false);
-  const [answerResult, setAnswerResult] = useState(true);
+  const [answerResult, setAnswerResult] = useState("");
   const [isMyAnswer, setIsMyAnswer] = useState("");
+  const [isQuestion, setIsQuestion] = useState(true);
+  const [timeLimitMs, setTimeLimit] = useState(0);
+  const [timeLeftMs, { start, pause, resume, reset }] = useCountDown(0, 100);
 
   // TODO others_correct_answer
   // TODO others_incorrect_answer
@@ -50,53 +55,57 @@ const App: React.FC<Props> = (props) => {
     };
     webSocket.onmessage = (data) => {
       console.log(data.data);
-      const msg: string = data.data;
+      // const msg: string = data.data;
+      const split: string = data.data.split(" ");
+      const command = split[0];
 
-      if (data.data.startsWith("/quiz_started")) {
+      if (command == "/quiz_started") {
         setIsStarted(true);
-      } else if (data.data.startsWith("/question")) {
-        const split: string = data.data.split(" ", 3);
-        const timeLimitMs = Number.parseInt(split[1]);
+      } else if (command == "/question") {
+        const tl = Number.parseInt(split[1]);
         const question = split[2];
         setCurrentQuestion(question);
         setCurrentQuestionAnswer("");
         setCurrentQuestionExplanatory("");
-        setAnswerResult(false);
+        setAnswerResult("");
+        setIsQuestion(true);
+        setOthersAnswer("");
+        setTimeLimit(tl);
+        start(tl);
 
         setIsTimeUp(false);
-      } else if (data.data.startsWith("/ans_lock")) {
+      } else if (command == "/ans_lock") {
         setIsAnswerLock(true);
-      } else if (data.data.startsWith("/ans_unlock")) {
+      } else if (command == "/ans_unlock") {
         setIsAnswerLock(false);
-      } else if (data.data.startsWith("/timeup")) {
+      } else if (command == "/timeup") {
         setIsTimeUp(true);
-      } else if (data.data.startsWith("/question_answer")) {
-        const split: string = data.data.split(" ");
+        setCurrentQuestion("Time Up!");
+      } else if (command == "/question_answer") {
         const answer = split[1];
+        console.log("答え" + answer);
 
         setCurrentQuestionAnswer(answer);
-      } else if (data.data.startsWith("/explanatory")) {
-        const split: string = data.data.split(" ");
+      } else if (command == "/explanatory") {
         const explanatory = split[1];
 
+        setIsQuestion(false);
         setCurrentQuestionExplanatory(explanatory);
-      } else if (data.data.startsWith("/others_correct_answer")) {
-        const split: string = data.data.split(" ");
+      } else if (command == "/others_correct_answer") {
         const id = Number.parseInt(split[1]);
         const answer = split[2];
 
-        setAnswerResult(true);
+        setAnswerResult("○");
         setOthersAnswer(answer);
         console.log(answer);
-      } else if (data.data.startsWith("/others_incorrect_answer")) {
-        const split: string = data.data.split(" ");
+      } else if (command == "/others_incorrect_answer") {
         const id = Number.parseInt(split[1]);
         const answer = split[2];
 
-        setAnswerResult(false);
+        setAnswerResult("✕");
         setOthersAnswer(answer);
         console.log(answer);
-      } else if (data.data.startsWith("/users")) {
+      } else if (command == "/users") {
         const userData: string = data.data;
         const userJson = userData.split(" ", 2)[1];
 
@@ -104,22 +113,22 @@ const App: React.FC<Props> = (props) => {
         const json = JSON.parse(userJson) as User[];
         console.log("in eff" + json);
         setUserData(json);
-      } else if (data.data.startsWith == "/join_ok") {
+      } else if (command == "/join_ok") {
         console.log("OKKKKKK");
         setIsWelcome(false);
-      } else if (data.data.startsWith("/join_err")) {
+      } else if (command == "/join_err") {
         setIsWelcome(true);
-      } else if (data.data.startsWith("/name_ok")) {
-      } else if (data.data.startsWith("/name_err")) {
-      } else if (data.data.startsWith("/quiz_started")) {
-      } else if (data.data.startsWith("/ans_ok")) {
+      } else if (command == "/name_ok") {
+      } else if (command == "/name_err") {
+      } else if (command == "/quiz_started") {
+      } else if (command == "/ans_ok") {
         setIsAnswerRight(true);
-      } else if (data.data.startsWith("/ans_err")) {
+      } else if (command == "/ans_err") {
         setIsAnswerRight(false);
-      } else if (data.data.startsWith("/correct")) {
-        setAnswerResult(true);
-      } else if (data.data.startsWith("/incorrect")) {
-        setAnswerResult(false);
+      } else if (command == "/correct") {
+        setAnswerResult("正解！");
+      } else if (command == "/incorrect") {
+        setAnswerResult("残念...");
       }
     };
 
@@ -145,21 +154,22 @@ const App: React.FC<Props> = (props) => {
     webSocket.send("/start");
   };
   const sendAnsReq = () => {
-    webSocket.send("/ans_req");
+    if (!isAnswerLock) {
+      webSocket.send("/ans_req");
+    }
   };
   const sendAnswer = (answer: string) => {
-    webSocket.send("/answer " + answer);
-    setIsAnswerRight(false);
+    if (isAnswerRight) {
+      webSocket.send("/answer " + answer);
+      setIsAnswerRight(false);
+      setOthersAnswer(answer);
+    }
   };
 
   return (
     <div>
       {isWelcome ? (
-        <Welcome
-          sendJoin={sendJoin}
-          sendName={sendName}
-          setIsWelcomeFalse={setIsWelcomeFalse}
-        />
+        <Welcome sendJoin={sendJoin} sendName={sendName} />
       ) : (
         <Quiz
           sendStart={sendStart}
@@ -172,6 +182,9 @@ const App: React.FC<Props> = (props) => {
           sendAnsReq={sendAnsReq}
           isAnswerRight={isAnswerRight}
           sendAnswer={sendAnswer}
+          isQuestion={isQuestion}
+          currentQuestionExplanatory={currentQuestionExplanatory}
+          timeLeftSec={timeLeftMs / 1000}
         />
       )}
     </div>

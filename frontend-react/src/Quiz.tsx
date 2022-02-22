@@ -1,6 +1,8 @@
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { Children, useCallback, useEffect, useState } from "react";
+import Countdown from "react-countdown";
 import { User, Users } from "./App";
+import Question from "./Question";
 import ScoreBoardItem from "./ScoreBoardItem";
 interface Props {
   sendStart: () => void;
@@ -8,11 +10,14 @@ interface Props {
   isStarted: boolean;
   currentQuestion: string;
   currentQuestionAnswer: string;
-  answerResult: boolean;
+  answerResult: string;
   othersAnswer: string;
   sendAnsReq: () => void;
   isAnswerRight: boolean;
   sendAnswer: (ans: string) => void;
+  isQuestion: boolean;
+  currentQuestionExplanatory: string;
+  timeLeftSec: number;
 }
 
 interface ScoreData {
@@ -23,39 +28,22 @@ interface ScoreData {
 const Quiz: React.FC<Props> = (props) => {
   const [scoreData, setScoreData] = useState<User[]>([]);
 
-  useEffect(() => {
-    const sampleData: User[] = [
-      {
-        id: 0,
-        name: "nissie",
-        score: 20,
-      },
-      {
-        id: 0,
-        name: "nissie",
-        score: 20,
-      },
-      {
-        id: 0,
-        name: "nissie",
-        score: 20,
-      },
-    ];
-    setScoreData(sampleData);
-  }, []);
-
-  let myAnswer = "";
+  let [myAnswer, setMyAnswer] = useState("");
   const inputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    myAnswer = e.target.value;
+    setMyAnswer(e.target.value);
   };
   const sendMyAnswer = () => {
     props.sendAnswer(myAnswer);
+    setMyAnswer("");
   };
   console.log(props.userData);
 
   return (
     <div className="quiz">
       {/* メインコンテンツ */}
+      <div className="text-center text-black text-7xl mt-4 -mb-11 italic">
+        {props.timeLeftSec}
+      </div>
       <div className="main grid grid-cols-3 pt-20 h-full">
         {/* スコアボード */}
         <div className="scoreboard grid grid-rows">
@@ -76,9 +64,15 @@ const Quiz: React.FC<Props> = (props) => {
         <div className="monitor border-2 border-black flex justify-center items-center text-center rounded-lg">
           <div className="monitor-start">
             <div className="monitor-text">
-              {props.isStarted
-                ? "問題 " + props.currentQuestion
-                : "メンバーは揃いましたか？"}
+              {props.isStarted ? (
+                <Question
+                  isQuestion={props.isQuestion}
+                  currentQuestion={props.currentQuestion}
+                  currentQuestionExplanatory={props.currentQuestionExplanatory}
+                />
+              ) : (
+                "メンバーは揃いましたか？"
+              )}
             </div>
             {props.isStarted ? (
               <div />
@@ -109,7 +103,7 @@ const Quiz: React.FC<Props> = (props) => {
           {/* 結果 */}
           <div className="result user-answer grid grid-rows-1 flex justify-center items-center text-center border-4 border-sky-200 p-1 mx-20 rounded-b-lg">
             <div className="result-key">結果</div>
-            <div className="result-value">{props.answerResult ? "○" : "✕"}</div>
+            <div className="result-value">{props.answerResult}</div>
           </div>
         </div>
       </div>
@@ -124,7 +118,13 @@ const Quiz: React.FC<Props> = (props) => {
         </button>
       </div>
       {/* 解答フォーム */}
-      <form className="answer-form flex items-center justify-center mt-20">
+      <form
+        className="answer-form flex items-center justify-center mt-20"
+        onSubmit={(e) => {
+          e.preventDefault();
+          sendMyAnswer();
+        }}
+      >
         {/* 入力フォーム */}
         <label htmlFor="answer" className="sr-only">
           解答
@@ -134,6 +134,7 @@ const Quiz: React.FC<Props> = (props) => {
           type="text"
           name="answer"
           id="answer"
+          value={myAnswer}
           className=""
         />
         {/* 送信ボタン */}
