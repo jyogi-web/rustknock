@@ -7,6 +7,8 @@ import { stringify } from "querystring";
 import { type } from "os";
 import Countdown from "react-countdown";
 import useCountDown from "react-countdown-hook";
+import { json } from "stream/consumers";
+import Result from "./Result";
 // import socketIOClient from "socket.io-client";
 
 // const URL = "wss://rustknock-server.azurewebsites.net/ws/";
@@ -45,6 +47,7 @@ const App: React.FC<Props> = (props) => {
   const [isQuestion, setIsQuestion] = useState(true);
   const [timeLimitMs, setTimeLimit] = useState(0);
   const [timeLeftMs, { start, pause, resume, reset }] = useCountDown(0, 100);
+  const [isEnd, setIsEnd] = useState(false);
 
   // TODO others_correct_answer
   // TODO others_incorrect_answer
@@ -129,6 +132,8 @@ const App: React.FC<Props> = (props) => {
         setAnswerResult("正解！");
       } else if (command == "/incorrect") {
         setAnswerResult("残念...");
+      } else if (command == "/result") {
+        setIsEnd(true);
       }
     };
 
@@ -170,7 +175,7 @@ const App: React.FC<Props> = (props) => {
     <div>
       {isWelcome ? (
         <Welcome sendJoin={sendJoin} sendName={sendName} />
-      ) : (
+      ) : !isEnd ? (
         <Quiz
           sendStart={sendStart}
           userData={userData}
@@ -186,6 +191,8 @@ const App: React.FC<Props> = (props) => {
           currentQuestionExplanatory={currentQuestionExplanatory}
           timeLeftSec={timeLeftMs / 1000}
         />
+      ) : (
+        <Result userData={userData} />
       )}
     </div>
   );
