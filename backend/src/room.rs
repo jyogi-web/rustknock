@@ -19,7 +19,7 @@ use crate::message::{
 
 const QUIZ_QUESTION_NUMBER: usize = 5;
 const SELECT_QUIZZES_ENDPOINT: &'static str = "http://localhost:3000/quiz/";
-const DELAY_START_MS: u64 = 5000;
+const DELAY_START_MS: u64 = 3000;
 const QUIZ_LIMIT_TIME_MS: u64 = 60000;
 const INTERVAL_OF_QUIZ_MS: u64 = 5000;
 
@@ -393,7 +393,6 @@ impl Handler<AnswerRequest> for QuizRoom {
                 };
                 self.broadcast_message(&explanatory);
                 self.delay_notification(INTERVAL_OF_QUIZ_MS, ctx);
-                return MessageResult(Ok(()));
             } else {
                 self.during_answer_id = None;
                 self.state = QuizLifecycle::AnswerRightWaiting;
@@ -407,6 +406,10 @@ impl Handler<AnswerRequest> for QuizRoom {
 
         if is_correct_answer {
             self.send_users_data_json();
+            info!("Send users data");
+            return MessageResult(Ok(()));
+        } else {
+            debug!("正解ではない");
         }
 
         MessageResult(Err("/incorrect".to_string()))
