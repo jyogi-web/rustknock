@@ -26,12 +26,13 @@ interface ScoreData {
 const Quiz: React.FC<Props> = (props) => {
   const [scoreData, setScoreData] = useState<User[]>([]);
 
-  let myAnswer = "";
+  let [myAnswer, setMyAnswer] = useState("");
   const inputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    myAnswer = e.target.value;
+    setMyAnswer(e.target.value);
   };
   const sendMyAnswer = () => {
     props.sendAnswer(myAnswer);
+    setMyAnswer("");
   };
   console.log(props.userData);
 
@@ -128,6 +129,7 @@ const Quiz: React.FC<Props> = (props) => {
           type="text"
           name="answer"
           id="answer"
+          value={myAnswer}
           className=""
         />
         {/* 送信ボタン */}
