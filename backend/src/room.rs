@@ -17,7 +17,7 @@ use crate::message::{
     LeaveRoom, QuizStartRequest, StopDelayActor, StopQuizRoom, WsMessage,
 };
 
-const QUIZ_QUESTION_NUMBER: usize = 7;
+const QUIZ_QUESTION_NUMBER: usize = 5;
 const SELECT_QUIZZES_ENDPOINT: &'static str = "http://localhost:3000/quiz/";
 const DELAY_START_MS: u64 = 3000;
 const QUIZ_LIMIT_TIME_MS: u64 = 60000;

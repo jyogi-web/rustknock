@@ -5,6 +5,8 @@ import Welcome from "./Welcome";
 import Quiz from "./Quiz";
 import { stringify } from "querystring";
 import { type } from "os";
+import Countdown from "react-countdown";
+import useCountDown from "react-countdown-hook";
 // import socketIOClient from "socket.io-client";
 
 // const URL = "wss://rustknock-server.azurewebsites.net/ws/";
@@ -41,6 +43,8 @@ const App: React.FC<Props> = (props) => {
   const [answerResult, setAnswerResult] = useState("");
   const [isMyAnswer, setIsMyAnswer] = useState("");
   const [isQuestion, setIsQuestion] = useState(true);
+  const [timeLimitMs, setTimeLimit] = useState(0);
+  const [timeLeftMs, { start, pause, resume, reset }] = useCountDown(0, 100);
 
   // TODO others_correct_answer
   // TODO others_incorrect_answer
@@ -58,7 +62,7 @@ const App: React.FC<Props> = (props) => {
       if (command == "/quiz_started") {
         setIsStarted(true);
       } else if (command == "/question") {
-        const timeLimitMs = Number.parseInt(split[1]);
+        const tl = Number.parseInt(split[1]);
         const question = split[2];
         setCurrentQuestion(question);
         setCurrentQuestionAnswer("");
@@ -66,6 +70,8 @@ const App: React.FC<Props> = (props) => {
         setAnswerResult("");
         setIsQuestion(true);
         setOthersAnswer("");
+        setTimeLimit(tl);
+        start(tl);
 
         setIsTimeUp(false);
       } else if (command == "/ans_lock") {
@@ -74,6 +80,7 @@ const App: React.FC<Props> = (props) => {
         setIsAnswerLock(false);
       } else if (command == "/timeup") {
         setIsTimeUp(true);
+        setCurrentQuestion("Time Up!");
       } else if (command == "/question_answer") {
         const answer = split[1];
         console.log("答え" + answer);
@@ -147,12 +154,16 @@ const App: React.FC<Props> = (props) => {
     webSocket.send("/start");
   };
   const sendAnsReq = () => {
-    webSocket.send("/ans_req");
+    if (!isAnswerLock) {
+      webSocket.send("/ans_req");
+    }
   };
   const sendAnswer = (answer: string) => {
-    webSocket.send("/answer " + answer);
-    setIsAnswerRight(false);
-    setOthersAnswer(answer);
+    if (isAnswerRight) {
+      webSocket.send("/answer " + answer);
+      setIsAnswerRight(false);
+      setOthersAnswer(answer);
+    }
   };
 
   return (
@@ -173,6 +184,7 @@ const App: React.FC<Props> = (props) => {
           sendAnswer={sendAnswer}
           isQuestion={isQuestion}
           currentQuestionExplanatory={currentQuestionExplanatory}
+          timeLeftSec={timeLeftMs / 1000}
         />
       )}
     </div>

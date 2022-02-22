@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
-import { useCallback, useEffect, useState } from "react";
+import { Children, useCallback, useEffect, useState } from "react";
+import Countdown from "react-countdown";
 import { User, Users } from "./App";
 import Question from "./Question";
 import ScoreBoardItem from "./ScoreBoardItem";
@@ -16,6 +17,7 @@ interface Props {
   sendAnswer: (ans: string) => void;
   isQuestion: boolean;
   currentQuestionExplanatory: string;
+  timeLeftSec: number;
 }
 
 interface ScoreData {
@@ -39,6 +41,9 @@ const Quiz: React.FC<Props> = (props) => {
   return (
     <div className="quiz">
       {/* メインコンテンツ */}
+      <div className="text-center text-black text-7xl mt-4 -mb-11 italic">
+        {props.timeLeftSec}
+      </div>
       <div className="main grid grid-cols-3 pt-20 h-full">
         {/* スコアボード */}
         <div className="scoreboard grid grid-rows">
