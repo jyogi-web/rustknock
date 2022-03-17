@@ -77,7 +77,7 @@ async fn main() -> std::io::Result<()> {
                 // リリース時
                 // 全許可
                 Cors::default()
-                    .allow_any_origin()
+                    .allowed_origin("rustknock.romira.social")
                     .send_wildcard()
                     .max_age(3600)
             })
