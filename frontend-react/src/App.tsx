@@ -11,8 +11,8 @@ import { json } from "stream/consumers";
 import Result from "./Result";
 // import socketIOClient from "socket.io-client";
 
-// const URL = "wss://rustknock-server.azurewebsites.net/ws/";
-const URL = "ws://localhost:3000/ws/";
+const URL = "wss://rustknock-server.azurewebsites.net/ws/";
+// const URL = "ws://localhost:3000/ws/";
 const webSocket = new WebSocket(URL);
 
 export type User = {
