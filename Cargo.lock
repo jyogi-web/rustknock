@@ -1089,7 +1089,7 @@ dependencies = [
  "http",
  "indexmap",
  "slab",
- "tokio 1.16.1",
+ "tokio 1.18.4",
  "tokio-util 0.6.9",
  "tracing",
 ]
@@ -1181,7 +1181,7 @@ dependencies = [
  "itoa 0.4.8",
  "pin-project-lite 0.2.8",
  "socket2 0.4.4",
- "tokio 1.16.1",
+ "tokio 1.18.4",
  "tower-service",
  "tracing",
  "want",
@@ -1196,7 +1196,7 @@ dependencies = [
  "bytes 1.1.0",
  "hyper",
  "native-tls",
- "tokio 1.16.1",
+ "tokio 1.18.4",
  "tokio-native-tls",
 ]
 
@@ -1410,14 +1410,15 @@ dependencies = [
 
 [[package]]
 name = "mio"
-version = "0.7.14"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8067b404fe97c70829f082dec8bcf4f71225d7eaea1d8645349cb76fa06205cc"
+checksum = "52da4364ffb0e4fe33a9841a98a3f3014fb964045ce4f7a45a398243c8d6b0c9"
 dependencies = [
  "libc",
  "log",
  "miow 0.3.7",
  "ntapi",
+ "wasi 0.11.0+wasi-snapshot-preview1",
  "winapi 0.3.9",
 ]
 
@@ -1910,7 +1911,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_urlencoded",
- "tokio 1.16.1",
+ "tokio 1.18.4",
  "tokio-native-tls",
  "url",
  "wasm-bindgen",
@@ -1968,7 +1969,7 @@ dependencies = [
  "serde",
  "serde_json",
  "simplelog",
- "tokio 1.16.1",
+ "tokio 1.18.4",
 ]
 
 [[package]]
@@ -2415,16 +2416,17 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.16.1"
+version = "1.18.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c27a64b625de6d309e8c57716ba93021dccf1b3b5c97edd6d3dd2d2135afc0a"
+checksum = "8bfb875c82dc0a4f1f37a30e720dee181a2b3a06a428b0fc6873ea38d6407850"
 dependencies = [
  "bytes 1.1.0",
  "libc",
  "memchr",
- "mio 0.7.14",
+ "mio 0.8.2",
  "num_cpus",
  "pin-project-lite 0.2.8",
+ "socket2 0.4.4",
  "winapi 0.3.9",
 ]
 
@@ -2435,7 +2437,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f7d995660bd2b7f8c1568414c1126076c13fbb725c40112dc0120b78eb9b717b"
 dependencies = [
  "native-tls",
- "tokio 1.16.1",
+ "tokio 1.18.4",
 ]
 
 [[package]]
@@ -2464,7 +2466,7 @@ dependencies = [
  "futures-sink",
  "log",
  "pin-project-lite 0.2.8",
- "tokio 1.16.1",
+ "tokio 1.18.4",
 ]
 
 [[package]]
@@ -2680,6 +2682,12 @@ name = "wasi"
 version = "0.10.0+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1a143597ca7c7793eff794def352d41792a93c481eb1042423ff7ff72ba2c31f"
+
+[[package]]
+name = "wasi"
+version = "0.11.0+wasi-snapshot-preview1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
 name = "wasm-bindgen"

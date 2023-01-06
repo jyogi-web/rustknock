@@ -24,6 +24,6 @@ getset = "0.1.2"
 log = "0.4.14"
 rand = "0.8.4"
 simplelog = "0.11.2"
-tokio = {version = "1.16.1", features = ["time"]}
+tokio = {version = "1.18.4", features = ["time"]}
 
 quiz_json = {path = "../quiz_json"}
